@@ -6,18 +6,30 @@ layout and native PTY compatibility fix from [dsh-bun](https://github.com/maci0/
 [Download prereleases](https://github.com/maci0/paseo-bun/releases) ·
 [Install, run and update](docs/bun-dist.md) · [Build from source](docs/bun.md)
 
+## TL;DR — Linux x64
+
+Download, verify and unpack the native AOT build (`--trim` enabled). No Node or Bun installation needed:
+
 ```sh
-npm ci --ignore-scripts --no-audit --no-fund
-npm run postinstall
-bun run build:bun
-bun run test:bun
+release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.15.4-1
+archive=paseo-bun-0.15.4-linux-x64-aot.tar.gz
+curl -fLO "$release_url/$archive" &&
+curl -fLO "$release_url/$archive.sha256" &&
+sha256sum -c "$archive.sha256" &&
+tar -xzf "$archive" &&
+./paseo-bun/paseo-bun --version
 ```
 
-The build creates a versioned Linux AOT archive, SHA-256 checksum and installation
-instructions in `dist/`. Install the complete directory: native dependencies and
-assets ship beside the executable. No system Node/Bun is required for the daemon
-or terminals. Dynamic plugins and external scripts remain interpreted; voice
-and authenticated agent sessions are not yet validated.
+Start a daemon with a separate home:
+
+```sh
+./paseo-bun/paseo-bun daemon start --home "$HOME/.paseo-bun"
+```
+
+Keep the entire extracted directory together. For a global command, upgrades or
+uninstalling, follow the [installation instructions](docs/bun-dist.md).
+This is an experimental CLI/daemon preview. Dynamic plugins remain interpreted;
+voice and authenticated agent sessions are not yet validated.
 
 ---
 
