@@ -1,4 +1,4 @@
-name: Bun package
+name: Bun native AOT package
 
 on:
   push:
@@ -32,10 +32,12 @@ jobs:
       - run: npm run postinstall
       - run: bun run build:bun
       - run: npx vitest run --config packages/server/vitest.config.ts packages/server/src/server/paseo-env.test.ts
+      - run: bun test scripts/aot-module-path.test.ts
       - run: bun run test:bun
-      - run: tar -C dist -czf dist/paseo-bun-linux-x64.tar.gz paseo-bun
       - uses: actions/upload-artifact@v4
         with:
-          name: paseo-bun-linux-x64
-          path: dist/paseo-bun-linux-x64.tar.gz
+          name: paseo-bun-linux-x64-aot
+          path: |
+            dist/*-aot.tar.gz
+            dist/*-aot.tar.gz.sha256
           if-no-files-found: error

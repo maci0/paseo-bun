@@ -100,11 +100,22 @@ describe("paseo env contract", () => {
     expect(command.args).toEqual(["script.js"]);
     expect(command.env[ELECTRON_RUN_AS_NODE]).toBe("1");
     expect(command.env.CUSTOM).toBe("value");
-    expect(command.env.BUN_BE_BUN).toBe(process.versions.bun ? "1" : undefined);
+    expect(command.env.BUN_BE_BUN).toBe(
+      process.versions.bun && !("paseoAot" in globalThis) ? "1" : undefined,
+    );
     expect(command.env.ELECTRON_NO_ATTACH_CONSOLE).toBeUndefined();
     expect(command.env.PASEO_DESKTOP_MANAGED).toBeUndefined();
     expect(command.env[PASEO_NODE_ENV]).toBeUndefined();
     expect(command.env.PASEO_SUPERVISED).toBeUndefined();
+  });
+
+  test("native AOT self commands do not request the absent Bun CLI", () => {
+    Object.defineProperty(globalThis, "paseoAot", { value: true, configurable: true });
+    try {
+      expect(buildSelfNodeCommand(["worker.js"]).env.BUN_BE_BUN).toBeUndefined();
+    } finally {
+      Reflect.deleteProperty(globalThis, "paseoAot");
+    }
   });
 
   test("does not add Electron node mode for non-execPath commands", () => {

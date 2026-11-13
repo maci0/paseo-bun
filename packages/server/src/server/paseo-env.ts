@@ -67,7 +67,7 @@ export function buildSelfNodeCommand(
   Object.assign(
     env,
     { [ELECTRON_RUN_AS_NODE]: "1" },
-    process.versions.bun ? { BUN_BE_BUN: "1" } : {},
+    process.versions.bun && !("paseoAot" in globalThis) ? { BUN_BE_BUN: "1" } : {},
     envOverlay,
   );
   for (const [key, value] of Object.entries(env)) {

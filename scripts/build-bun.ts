@@ -11,6 +11,8 @@ import {
   symlinkSync,
 } from "node:fs";
 import path from "node:path";
+import { rebaseModuleUrl } from "./aot-module-path";
+import { createHash } from "node:crypto";
 
 const root = path.resolve(import.meta.dir, "..");
 const output = path.join(root, "dist/paseo-bun");
@@ -79,12 +81,58 @@ cpSync(
   path.join(root, "scripts/node-pty-bun-readstream.cjs"),
   path.join(ptyLibrary, "bunReadStream.js"),
 );
-run(process.execPath, [
-  "build",
-  "scripts/bun-entry.ts",
-  "--compile",
-  "--production",
-  "--outfile",
-  path.join(output, "paseo-bun"),
-]);
-console.log(`Built ${output}/paseo-bun; distribute the entire directory.`);
+// Preserve disk asset locations while compiling the application graph to native code.
+function rebaseModules(directory: string) {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    if (entry.isSymbolicLink() || entry.name === "node_modules") continue;
+    const file = path.join(directory, entry.name);
+    if (entry.isDirectory()) rebaseModules(file);
+    else if (/\.[cm]?js$/.test(entry.name)) {
+      const relative = path.relative(output, file).split(path.sep).join("/");
+      const source = readFileSync(file, "utf8");
+      writeFileSync(file, rebaseModuleUrl(source, relative));
+    }
+  }
+}
+rebaseModules(path.join(output, "packages"));
+cpSync(path.join(root, "scripts/aot-entry.js"), path.join(output, "aot-entry.js"));
+execFileSync(
+  process.execPath,
+  [
+    "compile",
+    "aot-entry.js",
+    "--root",
+    ".",
+    "--production",
+    "--aot-allow-code-from-disk",
+    "--outfile",
+    "paseo-bun",
+  ],
+  { cwd: output, stdio: "inherit" },
+);
+console.log(`Built native AOT ${output}/paseo-bun; distribute the entire directory.`);
+const version = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8")).version;
+const archive = `paseo-bun-${version}-${process.platform}-${process.arch}-aot.tar.gz`;
+const info = {
+  version,
+  mode: "native-aot",
+  aotInput: "upstream-emitted-javascript",
+  platform: process.platform,
+  arch: process.arch,
+  archive,
+  bunRevision: execFileSync(process.execPath, ["--revision"], { encoding: "utf8" }).trim(),
+  sourceCommit: execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim(),
+  sourceDirty: Boolean(
+    execFileSync("git", ["status", "--porcelain", "--untracked-files=no"], {
+      cwd: root,
+      encoding: "utf8",
+    }).trim(),
+  ),
+};
+writeFileSync(path.join(output, "build-info.json"), JSON.stringify(info, null, 2) + "\n");
+cpSync(path.join(root, "docs/bun-dist.md"), path.join(output, "README.md"));
+const archivePath = path.join(root, "dist", archive);
+run("tar", ["-C", path.join(root, "dist"), "-czf", archivePath, "paseo-bun"]);
+const checksum = createHash("sha256").update(readFileSync(archivePath)).digest("hex");
+writeFileSync(archivePath + ".sha256", `${checksum}  ${archive}\n`);
+console.log(`Distribution: ${archivePath} (SHA-256 alongside)`);
