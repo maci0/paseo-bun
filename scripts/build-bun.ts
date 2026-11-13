@@ -104,6 +104,7 @@ execFileSync(
     "--root",
     ".",
     "--production",
+    "--trim",
     "--aot-allow-code-from-disk",
     "--outfile",
     "paseo-bun",
@@ -116,6 +117,7 @@ const archive = `paseo-bun-${version}-${process.platform}-${process.arch}-aot.ta
 const info = {
   version,
   mode: "native-aot",
+  trim: true,
   aotInput: "upstream-emitted-javascript",
   platform: process.platform,
   arch: process.arch,

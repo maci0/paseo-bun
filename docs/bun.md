@@ -48,8 +48,13 @@ they are not required to run the packaged daemon and terminals.
 retains dependency licenses, applies the node-pty adapter, and runs:
 
 ```sh
-bun compile aot-entry.js --root . --production --aot-allow-code-from-disk --outfile paseo-bun
+bun compile aot-entry.js --root . --production --trim --aot-allow-code-from-disk --outfile paseo-bun
 ```
+
+`--trim` removes unused Bun/Node runtime APIs. The archive smoke test checks the
+remaining APIs against plugin loading and worker/terminal lifecycle operations.
+On the tested compiler it trims about 2.4 MB; Bun conservatively keeps APIs
+needed by dynamic imports, generated code and native addons.
 
 The static import graph includes the CLI, supervisor, daemon, terminal worker
 and speech worker. The dispatcher selects the requested worker before entering

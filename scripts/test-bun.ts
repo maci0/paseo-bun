@@ -19,6 +19,7 @@ const temporary = mkdtempSync(path.join(tmpdir(), "paseo-bun-test-"));
 const dist = path.resolve(import.meta.dir, "../dist");
 const info = JSON.parse(readFileSync(path.join(dist, "paseo-bun/build-info.json"), "utf8"));
 assert.equal(info.mode, "native-aot");
+assert.equal(info.trim, true);
 const archive = path.join(dist, info.archive);
 assert.equal(
   createHash("sha256").update(readFileSync(archive)).digest("hex"),
