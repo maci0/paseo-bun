@@ -21,7 +21,7 @@ function resolveServerRunnerFromDir(currentDir: string): string | null {
 }
 
 function resolveDaemonRunnerEntry(): string {
-  if (import.meta.url.startsWith("file:///$bunfs/")) {
+  if ("paseoAot" in globalThis || import.meta.url.startsWith("file:///$bunfs/")) {
     const entry = resolveServerRunnerFromDir(
       path.join(path.dirname(process.execPath), "packages/server"),
     );

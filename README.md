@@ -1,21 +1,23 @@
 # paseo-bun
 
-Bun-packaged Paseo, based on upstream 0.15.4 and the build approach used by
-[dsh-bun](https://github.com/maci0/dsh-bun). The CLI executable includes Bun;
-the daemon, native dependencies and runtime assets ship beside it.
+Native AOT Paseo CLI and daemon, based on upstream 0.15.4. Uses the distribution
+layout and native PTY compatibility fix from [dsh-bun](https://github.com/maci0/dsh-bun).
+
+[Download prereleases](https://github.com/maci0/paseo-bun/releases) ·
+[Install, run and update](docs/bun-dist.md) · [Build from source](docs/bun.md)
 
 ```sh
 npm ci --ignore-scripts --no-audit --no-fund
 npm run postinstall
 bun run build:bun
 bun run test:bun
-./dist/paseo-bun/paseo-bun --help
 ```
 
-See [Bun build, packaging and limitations](docs/bun.md). Distribute the entire
-`dist/paseo-bun/` directory. This uses `bun build --compile --production`, not
-experimental native AOT. Build tools include Node/npm; the packaged daemon
-and terminals run using the embedded Bun runtime.
+The build creates a versioned Linux AOT archive, SHA-256 checksum and installation
+instructions in `dist/`. Install the complete directory: native dependencies and
+assets ship beside the executable. No system Node/Bun is required for the daemon
+or terminals. Dynamic plugins and external scripts remain interpreted; voice
+and authenticated agent sessions are not yet validated.
 
 ---
 
