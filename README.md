@@ -1,3 +1,24 @@
+# paseo-bun
+
+Bun-packaged Paseo, based on upstream 0.15.4 and the build approach used by
+[dsh-bun](https://github.com/maci0/dsh-bun). The CLI executable includes Bun;
+the daemon, native dependencies and runtime assets ship beside it.
+
+```sh
+npm ci --ignore-scripts --no-audit --no-fund
+npm run postinstall
+bun run build:bun
+bun run test:bun
+./dist/paseo-bun/paseo-bun --help
+```
+
+See [Bun build, packaging and limitations](docs/bun.md). Distribute the entire
+`dist/paseo-bun/` directory. This uses `bun build --compile --production`, not
+experimental native AOT. Build tools include Node/npm; the packaged daemon
+and terminals run using the embedded Bun runtime.
+
+---
+
 <p align="center">
   <img src="packages/website/public/logo.svg" width="64" height="64" alt="Paseo logo">
 </p>

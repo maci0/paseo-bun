@@ -21,6 +21,7 @@ describe("paseo env contract", () => {
     PASEO_DESKTOP_MANAGED: "1",
     [PASEO_NODE_ENV]: "production",
     PASEO_SUPERVISED: "1",
+    BUN_BE_BUN: "1",
     ESBUILD_BINARY_PATH: "/Applications/Paseo.app/Contents/Resources/app.asar.unpacked/esbuild",
   };
   const runtimeControlEnvKeys = [
@@ -30,6 +31,7 @@ describe("paseo env contract", () => {
     "PASEO_SUPERVISED",
     "ELECTRON_NO_ATTACH_CONSOLE",
     "ESBUILD_BINARY_PATH",
+    "BUN_BE_BUN",
   ] as const;
 
   test("builds internal daemon child env by preserving pass-through and control vars", () => {
@@ -38,6 +40,7 @@ describe("paseo env contract", () => {
     expect(env).toMatchObject({
       [ELECTRON_RUN_AS_NODE]: "1",
       ELECTRON_NO_ATTACH_CONSOLE: "1",
+      BUN_BE_BUN: "1",
       NODE_ENV: "development",
       PATH: "/usr/bin",
       PASEO_DESKTOP_MANAGED: "1",
@@ -99,6 +102,7 @@ describe("paseo env contract", () => {
     expect(command.args).toEqual(["script.js"]);
     expect(command.env[ELECTRON_RUN_AS_NODE]).toBe("1");
     expect(command.env.CUSTOM).toBe("value");
+    expect(command.env.BUN_BE_BUN).toBe(process.versions.bun ? "1" : undefined);
     expect(command.env.ELECTRON_NO_ATTACH_CONSOLE).toBeUndefined();
     expect(command.env.PASEO_DESKTOP_MANAGED).toBeUndefined();
     expect(command.env[PASEO_NODE_ENV]).toBeUndefined();

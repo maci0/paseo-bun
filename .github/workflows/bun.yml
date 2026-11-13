@@ -1,0 +1,41 @@
+name: Bun package
+
+on:
+  push:
+    branches: [bun]
+  pull_request:
+    branches: [bun]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bun-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: canary
+      - run: bun --revision
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run postinstall
+      - run: bun run build:bun
+      - run: npx vitest run --config packages/server/vitest.config.ts packages/server/src/server/paseo-env.test.ts
+      - run: bun run test:bun
+      - run: tar -C dist -czf dist/paseo-bun-linux-x64.tar.gz paseo-bun
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paseo-bun-linux-x64
+          path: dist/paseo-bun-linux-x64.tar.gz
+          if-no-files-found: error
