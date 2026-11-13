@@ -78,6 +78,6 @@ Linux x64, Bun `1.4.5-canary.1+d0f4fdd65`, Node `26.13.1`:
 - Subsequent full build/trace/package after small source edits: 73.84 seconds,
   1.06 GiB peak child-process RSS. This is not aggregate process-tree memory.
 - Bun's final minify/bundle/compile stage: approximately 0.34 seconds.
-- Distribution: approximately 244 MiB; executable approximately 156 MiB.
+- Distribution: approximately 245 MiB; executable approximately 156 MiB.
 - Relocated lifecycle/PTY smoke test passed; environment-contract unit tests:
   7 passed. No authenticated provider or speech inference was exercised.
