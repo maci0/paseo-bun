@@ -58,7 +58,7 @@ intend to delete that data.
 
 ## Scope
 
-The executable is native AOT with no JIT. Dynamic plugins, external agent
+The executable is native AOT with `--trim` enabled and no JIT. Dynamic plugins, external agent
 scripts, generated JavaScript and code loaded from disk use Bun's interpreter
 through `--aot-allow-code-from-disk`; they are not claimed to be native AOT.
 The included application entry points and their static dependency graph are
