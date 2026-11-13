@@ -1,13 +1,6 @@
-import { createRequire } from "node:module";
-
-const require = createRequire(import.meta.url);
-
-interface CliPackageJson {
-  version?: unknown;
-}
+import packageJson from "../package.json" with { type: "json" };
 
 export function resolveCliVersion(): string {
-  const packageJson = require("../package.json") as CliPackageJson;
   if (typeof packageJson.version === "string" && packageJson.version.trim().length > 0) {
     return packageJson.version.trim();
   }

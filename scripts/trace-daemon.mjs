@@ -144,6 +144,8 @@ const { fileList, warnings } = await nodeFileTrace(entries, {
   // is copied explicitly above), and a handful of test-only requires that
   // get tree-shaken out by tsc.
   ignore: [
+    ".git/**",
+    "dist/**",
     // Cross-platform native packages for the sherpa speech runtime;
     // only the host platform package is needed at runtime.
     "sherpa-onnx-*/**",

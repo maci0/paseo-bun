@@ -21,6 +21,14 @@ function resolveServerRunnerFromDir(currentDir: string): string | null {
 }
 
 function resolveDaemonRunnerEntry(): string {
+  if (import.meta.url.startsWith("file:///$bunfs/")) {
+    const entry = resolveServerRunnerFromDir(
+      path.join(path.dirname(process.execPath), "packages/server"),
+    );
+    if (!entry || !existsSync(entry))
+      throw new Error("Missing paseo-bun runtime; install the entire distribution directory.");
+    return entry;
+  }
   const serverExportPath = require.resolve("@getpaseo/server");
   let currentDir = path.dirname(serverExportPath);
 
