@@ -8,15 +8,23 @@ executable; copy the entire directory.
 
 ## Download and verify
 
-Download the matching `*-aot.tar.gz` and `*-aot.tar.gz.sha256` assets from
-https://github.com/maci0/paseo-bun/releases. Initial supported target: Linux x64.
-Use the same release's archive and checksum, in the same directory:
+For Linux x64, download the archive and checksum from the same prerelease.
+Run these commands in the directory where you want to unpack the package:
 
 ```sh
-sha256sum -c paseo-bun-0.15.4-linux-x64-aot.tar.gz.sha256
-tar -xzf paseo-bun-0.15.4-linux-x64-aot.tar.gz
+release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.15.4-1
+archive=paseo-bun-0.15.4-linux-x64-aot.tar.gz
+curl -fLO "$release_url/$archive" &&
+curl -fLO "$release_url/$archive.sha256" &&
+sha256sum -c "$archive.sha256" &&
+tar -xzf "$archive" &&
 ./paseo-bun/paseo-bun --version
 ```
+
+`curl -fL` fails on HTTP errors and follows GitHub's download redirects. The
+`&&` chain stops if a download or checksum verification fails. For another
+release, use its matching tag, archive and checksum from the
+[releases page](https://github.com/maci0/paseo-bun/releases).
 
 ## Install for your user
 
