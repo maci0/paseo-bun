@@ -1,6 +1,6 @@
 # paseo-bun
 
-Native AOT Paseo CLI and daemon, based on upstream 0.15.4. Uses the distribution
+Native AOT Paseo CLI and daemon, based on upstream 0.16.0-beta.2. Uses the distribution
 layout and native PTY compatibility fix from [dsh-bun](https://github.com/maci0/dsh-bun).
 
 [Download prereleases](https://github.com/maci0/paseo-bun/releases) ·
@@ -11,8 +11,8 @@ layout and native PTY compatibility fix from [dsh-bun](https://github.com/maci0/
 Download, verify and unpack the native AOT build (`--trim` enabled). No Node or Bun installation needed:
 
 ```sh
-release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.15.4-1
-archive=paseo-bun-0.15.4-linux-x64-aot.tar.gz
+release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-1
+archive=paseo-bun-0.16.0-beta.2-linux-x64-aot.tar.gz
 curl -fLO "$release_url/$archive" &&
 curl -fLO "$release_url/$archive.sha256" &&
 sha256sum -c "$archive.sha256" &&
