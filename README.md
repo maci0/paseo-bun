@@ -30,7 +30,7 @@ persisted server ID; other connected hosts remain remote.
 
 ## Downloads
 
-All assets below are from **bun-aot-v0.16.0-beta.2-2**, a public prerelease.
+All assets below are from **bun-aot-v0.16.0-beta.2-2**, a public beta release.
 
 | Package                               | Archive                                                                                                                                                 | Checksum                                                                                                                                             |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
