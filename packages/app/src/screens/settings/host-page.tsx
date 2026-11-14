@@ -33,7 +33,11 @@ import {
   ProfileDraft,
   TerminalProfileEditModal,
 } from "@/screens/settings/terminal-profile-edit-modal";
-import { startDesktopDaemon, stopDesktopDaemon } from "@/desktop/daemon/desktop-daemon";
+import {
+  shouldUseDesktopDaemon,
+  startDesktopDaemon,
+  stopDesktopDaemon,
+} from "@/desktop/daemon/desktop-daemon";
 import { LocalDaemonSection } from "@/desktop/components/desktop-updates-section";
 import { useDaemonStatus } from "@/desktop/hooks/use-daemon-status";
 import { useDesktopSettings } from "@/desktop/settings/desktop-settings";
@@ -381,7 +385,7 @@ export function HostSettingsPage({
 
       <HostAppearanceSection host={host} />
 
-      {isLocalDaemon ? <LocalDaemonSection /> : null}
+      {isLocalDaemon && shouldUseDesktopDaemon() ? <LocalDaemonSection /> : null}
 
       {!isLocalDaemon ? <UpdateDaemonCard key={host.serverId} host={host} /> : null}
 
@@ -1178,7 +1182,7 @@ function RemoveHostSection({
     const remove = async () => {
       let didDisableDaemonManagement = false;
       let didStopDaemon = false;
-      if (isLocalDaemon) {
+      if (isLocalDaemon && shouldUseDesktopDaemon()) {
         try {
           await updateSettings({ daemon: { manageBuiltInDaemon: false } });
           didDisableDaemonManagement = true;
