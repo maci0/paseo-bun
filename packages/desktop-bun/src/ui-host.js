@@ -10,9 +10,12 @@ export function createUiHost({ webRoot, daemonUrl, port = 6769 }) {
   const sessions = new Set();
   let server;
   const allowed = (request) => {
-    const host = `127.0.0.1:${server.port}`;
+    const hosts = [`127.0.0.1:${server.port}`, `localhost:${server.port}`];
     const origin = request.headers.get("origin");
-    return request.headers.get("host") === host && (!origin || origin === `http://${host}`);
+    return (
+      hosts.includes(request.headers.get("host")) &&
+      (!origin || hosts.some((host) => origin === `http://${host}`))
+    );
   };
   const proxy = (request) => {
     const url = new URL(request.url);
