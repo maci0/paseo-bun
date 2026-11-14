@@ -34,10 +34,13 @@ fn main() {
         }))
         .setup(move |app| {
             let executable = std::env::current_exe()?;
-            let engine = executable
+            let engine_directory = executable
                 .parent()
-                .ok_or("Missing installation directory")?
-                .join(format!("paseo-bun{}", std::env::consts::EXE_SUFFIX));
+                .ok_or("Missing installation directory")?;
+            #[cfg(target_os = "macos")]
+            let engine_directory = engine_directory.join("../Resources/runtime");
+            let engine =
+                engine_directory.join(format!("paseo-bun{}", std::env::consts::EXE_SUFFIX));
             let mut command = Command::new(engine);
             command
                 .arg("ui-host")

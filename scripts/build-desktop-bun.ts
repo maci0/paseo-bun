@@ -46,14 +46,19 @@ if (process.platform === "darwin") {
     path.join(root, "packages/desktop/assets/icon.icns"),
     path.join(contents, "Resources/icon.icns"),
   );
-  cpSync(output, path.join(contents, "MacOS"), { recursive: true });
+  cpSync(output, path.join(contents, "Resources/runtime"), { recursive: true });
+  mkdirSync(path.join(contents, "MacOS"));
+  cpSync(path.join(output, "paseo-bun-desktop"), path.join(contents, "MacOS/paseo-bun-desktop"));
   writeFileSync(
     path.join(contents, "Info.plist"),
     `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>CFBundleIconFile</key><string>icon.icns</string><key>CFBundleExecutable</key><string>paseo-bun-desktop</string><key>CFBundleIdentifier</key><string>sh.paseo.bun</string><key>CFBundleName</key><string>Paseo Bun</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>0.16.0</string><key>CFBundleVersion</key><string>2</string><key>NSHighResolutionCapable</key><true/></dict></plist>`,
   );
-  run("codesign", ["--force", "--deep", "--sign", "-", path.dirname(contents)]);
+  run("codesign", ["--force", "--sign", "-", path.dirname(contents)]);
 }
-run("tar", ["-C", archiveRoot, "-czf", archivePath, "paseo-bun"]);
+execFileSync("tar", ["-C", archiveRoot, "-czf", path.relative(root, archivePath), "paseo-bun"], {
+  cwd: root,
+  stdio: "inherit",
+});
 writeFileSync(
   archivePath + ".sha256",
   `${createHash("sha256").update(readFileSync(archivePath)).digest("hex")}  ${archive}\n`,
