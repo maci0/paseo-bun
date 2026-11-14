@@ -185,7 +185,7 @@ for (const w of warnings) {
 const expanded = new Set(fileList);
 for (const pattern of additionalInputs) {
   if (pattern.includes("*")) {
-    for await (const file of glob(pattern, { cwd: REPO_ROOT })) {
+    for await (const file of glob(pattern.split(path.sep).join("/"), { cwd: REPO_ROOT })) {
       expanded.add(path.relative(REPO_ROOT, path.resolve(REPO_ROOT, file)));
     }
   } else {
