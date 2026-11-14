@@ -17,6 +17,7 @@ const customWebPlatform = (process.env.PASEO_WEB_PLATFORM ?? "")
   .toLowerCase();
 
 const config = getDefaultConfig(projectRoot);
+if (process.env.PASEO_AOT_BUILD === "1") config.maxWorkers = 1;
 config.cacheVersion = isWatchdogBuild ? "watchdog" : "standard";
 const defaultResolveRequest = config.resolver.resolveRequest ?? resolve;
 
