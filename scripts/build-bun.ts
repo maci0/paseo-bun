@@ -103,6 +103,32 @@ if (process.platform !== "win32") {
     path.join(ptyLibrary, "bunReadStream.js"),
   );
 }
+if (process.platform === "win32") {
+  const library = path.join(output, "packages/server/node_modules/node-pty/lib");
+  const connection = path.join(library, "windowsConoutConnection.js");
+  const source = readFileSync(connection, "utf8");
+  const anchor =
+    "var scriptPath = __dirname.replace('node_modules.asar', 'node_modules.asar.unpacked');";
+  if (!source.includes(anchor)) throw new Error("node-pty ConPTY worker path changed");
+  writeFileSync(
+    connection,
+    source.replace(
+      anchor,
+      `var scriptPath = globalThis.paseoModuleUrl ? require("node:path").dirname(require("node:url").fileURLToPath(globalThis.paseoModuleUrl("packages/server/node_modules/node-pty/lib/windowsConoutConnection.js"))) : __dirname;`,
+    ),
+  );
+  const agent = path.join(library, "windowsPtyAgent.js");
+  const agentSource = readFileSync(agent, "utf8");
+  const agentPath = "path.join(__dirname, 'conpty_console_list_agent')";
+  if (!agentSource.includes(agentPath)) throw new Error("node-pty console helper path changed");
+  writeFileSync(
+    agent,
+    agentSource.replace(
+      agentPath,
+      `(globalThis.paseoModuleUrl ? require("node:url").fileURLToPath(globalThis.paseoModuleUrl("packages/server/node_modules/node-pty/lib/conpty_console_list_agent.js")) : path.join(__dirname, 'conpty_console_list_agent.js'))`,
+    ),
+  );
+}
 // Preserve disk asset locations while compiling the application graph to native code.
 function rebaseModules(directory: string) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
