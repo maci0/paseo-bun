@@ -22,6 +22,12 @@ cpSync(
   path.join(root, "packages/desktop-bun/src-tauri/target/release/paseo-bun-desktop" + suffix),
   path.join(output, "paseo-bun-desktop" + suffix),
 );
+const desktopVersion = execFileSync(
+  path.join(output, "paseo-bun-desktop" + suffix),
+  ["--version"],
+  { encoding: "utf8" },
+);
+if (!desktopVersion.includes("0.16.0-beta.2")) throw new Error("Desktop version smoke test failed");
 cpSync(path.join(root, "docs/bun-desktop.md"), path.join(output, "README-desktop.md"));
 const info = JSON.parse(readFileSync(path.join(output, "build-info.json"), "utf8"));
 const archive = `paseo-bun-desktop-${info.version}-${process.platform}-${process.arch}-aot.tar.gz`;
