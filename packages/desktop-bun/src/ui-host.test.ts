@@ -73,9 +73,12 @@ describe("Elysia desktop UI host", () => {
   });
   test("proxies JSON and binary WebSocket frames without changing wire types", async () => {
     const host = fixture();
-    const socket = new WebSocket(host.url.replace("http:", "ws:") + "/ws", {
-      headers: { origin: host.url },
-    });
+    const socket = new WebSocket(
+      host.url.replace("http:", "ws:").replace("127.0.0.1", "localhost") + "/ws",
+      {
+        headers: { origin: host.url },
+      },
+    );
     socket.binaryType = "arraybuffer";
     cleanup.push(() => socket.close());
     await new Promise<void>((resolve, reject) => {
