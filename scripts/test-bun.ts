@@ -75,7 +75,7 @@ function cli(args: string[], allowFailure = false): string {
   return result.stdout.trim();
 }
 try {
-  assert.match(cli(["--version"]), /0\.15\.4/);
+  assert.equal(cli(["--version"]), info.version);
   assert.match(cli(["--help"]), /daemon/);
   const jitProbe = spawnSync(binary, ["-e", "process.exit(0)"], {
     env: { ...env, BUN_BE_BUN: "1" },

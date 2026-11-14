@@ -1,6 +1,6 @@
 # paseo-bun native AOT distribution
 
-This Linux package contains the Paseo 0.15.4 CLI, daemon and terminal/speech
+This Linux package contains the Paseo 0.16.0-beta.2 CLI, daemon and terminal/speech
 worker entry points compiled to native code with Bun. It needs no separate
 Node or Bun installation for those processes. Agent tools remain separate
 installations. Native dependencies and runtime assets must stay beside the
@@ -12,8 +12,8 @@ For Linux x64, download the archive and checksum from the same prerelease.
 Run these commands in the directory where you want to unpack the package:
 
 ```sh
-release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.15.4-1
-archive=paseo-bun-0.15.4-linux-x64-aot.tar.gz
+release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-1
+archive=paseo-bun-0.16.0-beta.2-linux-x64-aot.tar.gz
 curl -fLO "$release_url/$archive" &&
 curl -fLO "$release_url/$archive.sha256" &&
 sha256sum -c "$archive.sha256" &&
@@ -32,7 +32,7 @@ From the directory containing the extracted `paseo-bun/` folder:
 
 ```sh
 mkdir -p "$HOME/.local/lib/paseo-bun" "$HOME/.local/bin"
-install_dir=$(mktemp -d "$HOME/.local/lib/paseo-bun/0.15.4-aot.XXXXXX")
+install_dir=$(mktemp -d "$HOME/.local/lib/paseo-bun/0.16.0-beta.2-aot.XXXXXX")
 cp -a paseo-bun/. "$install_dir/"
 ln -sfn "$install_dir/paseo-bun" "$HOME/.local/bin/paseo-bun"
 export PATH="$HOME/.local/bin:$PATH"
