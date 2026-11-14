@@ -3,10 +3,21 @@
   "productName": "Paseo Bun",
   "version": "0.16.0-beta.2",
   "identifier": "sh.paseo.bun",
-  "build": { "frontendDist": "ui" },
+  "build": {
+    "frontendDist": "ui"
+  },
   "app": {
     "windows": [],
-    "security": { "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'" }
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'"
+    }
   },
-  "bundle": { "active": false, "icon": ["../../desktop/assets/icon.png"] }
+  "bundle": {
+    "active": false,
+    "icon": [
+      "../../desktop/assets/icon.png",
+      "../../desktop/assets/icon.ico",
+      "../../desktop/assets/icon.icns"
+    ]
+  }
 }

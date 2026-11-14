@@ -44,6 +44,11 @@ fn main() {
                 .stdin(Stdio::null())
                 .stdout(Stdio::piped())
                 .stderr(Stdio::inherit());
+            #[cfg(target_os = "windows")]
+            {
+                use std::os::windows::process::CommandExt;
+                command.creation_flags(0x08000000);
+            }
             #[cfg(target_os = "linux")]
             {
                 use std::os::unix::process::CommandExt;
