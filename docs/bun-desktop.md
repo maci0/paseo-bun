@@ -1,11 +1,32 @@
 # Paseo Bun + Elysia + Tauri v2 Edition
 
-This Linux desktop distribution combines the native Bun AOT daemon and CLI, an
+This desktop distribution combines the native Bun AOT daemon and CLI, an
 Elysia HTTP host, and a Rust/Tauri v2 desktop window. It uses the production
 Paseo 0.16.0-beta.2 React UI, including our indexed history-hydration performance
 patch. The architecture follows [dsh-bun](https://github.com/evinelias/dsh-bun).
 
-## Download and run
+## macOS and Windows
+
+Native CI builds target macOS Apple Silicon (`darwin-arm64`), macOS Intel
+(`darwin-x64`), Windows x64 (`win32-x64`), and Linux x64. Download only published
+assets from the releases page; a running CI job is not a release asset.
+
+macOS desktop archives contain `paseo-bun/Paseo Bun.app`. Extract the entire
+archive and open the app, or move the whole `.app` to Applications. The AOT
+engine and dependencies are inside the app. Builds are ad-hoc signed, without
+Apple notarization; Gatekeeper may block first launch. The separate CLI archive
+contains the standalone `paseo-bun` command and its adjacent assets.
+
+Windows archives are portable: extract the entire `paseo-bun` directory and run
+`paseo-bun-desktop.exe`; `paseo-bun.exe` is the CLI. WebView2 Runtime is required.
+These builds are not Authenticode signed, so Windows may show a publisher warning.
+Use `Get-FileHash -Algorithm SHA256 <archive>` to compare with its `.sha256` file.
+Windows includes native ConPTY helpers; no Node or Bun installation is required.
+
+Native builds and CLI/daemon/PTY checks run on each target OS. Interactive macOS
+and Windows desktop workflows require manual validation on those systems.
+
+## Download and run — Linux
 
 Download matching `paseo-bun-desktop-*-linux-x64-aot.tar.gz` and `.sha256` assets
 from https://github.com/maci0/paseo-bun/releases, verify the checksum and extract:
@@ -70,7 +91,8 @@ bun run build:desktop:bun
 bun run test:bun
 ```
 
-The build creates separate CLI/web and desktop archives, each with a SHA-256
+The build runs on the target OS (AOT cross-compilation is not used).
+It creates separate CLI/web and desktop archives, each with a SHA-256
 checksum. `build-info.json` and `desktop-info.json` record their provenance.
 
 ## Compatibility

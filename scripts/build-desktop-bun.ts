@@ -41,11 +41,15 @@ if (process.platform === "darwin") {
   archiveRoot = path.join(root, "dist/desktop-macos");
   rmSync(archiveRoot, { recursive: true, force: true });
   const contents = path.join(archiveRoot, "paseo-bun/Paseo Bun.app/Contents");
-  mkdirSync(contents, { recursive: true });
+  mkdirSync(path.join(contents, "Resources"), { recursive: true });
+  cpSync(
+    path.join(root, "packages/desktop/assets/icon.icns"),
+    path.join(contents, "Resources/icon.icns"),
+  );
   cpSync(output, path.join(contents, "MacOS"), { recursive: true });
   writeFileSync(
     path.join(contents, "Info.plist"),
-    `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>CFBundleExecutable</key><string>paseo-bun-desktop</string><key>CFBundleIdentifier</key><string>sh.paseo.bun</string><key>CFBundleName</key><string>Paseo Bun</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>0.16.0</string><key>CFBundleVersion</key><string>2</string><key>NSHighResolutionCapable</key><true/></dict></plist>`,
+    `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>CFBundleIconFile</key><string>icon.icns</string><key>CFBundleExecutable</key><string>paseo-bun-desktop</string><key>CFBundleIdentifier</key><string>sh.paseo.bun</string><key>CFBundleName</key><string>Paseo Bun</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>0.16.0</string><key>CFBundleVersion</key><string>2</string><key>NSHighResolutionCapable</key><true/></dict></plist>`,
   );
   run("codesign", ["--force", "--deep", "--sign", "-", path.dirname(contents)]);
 }
