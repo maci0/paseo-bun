@@ -77,6 +77,7 @@ const ptyNativeFiles = (await readdir(ptyNativeRoot, { withFileTypes: true }))
 // them separately. The desktop derivation opts into tracing its Electron main
 // process and preloads as well.
 const entries = [
+  "packages/desktop-bun/src/ui-host-entry.js",
   "packages/cli/dist/index.js",
   "packages/server/dist/scripts/supervisor-entrypoint.js",
   "packages/server/dist/server/terminal/terminal-worker-process.js",

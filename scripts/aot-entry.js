@@ -25,20 +25,24 @@ globalThis.paseoModuleUrl = (relative) =>
       ? requested
       : path.join(root, relative),
   ).href;
-switch (role) {
-  case "supervisor-entrypoint.js":
-    await import("./packages/server/dist/scripts/supervisor-entrypoint.js");
-    break;
-  case "daemon-worker.js":
-    await import("./packages/server/dist/server/server/daemon-worker.js");
-    break;
-  case "terminal-worker.mjs":
-    await import("./packages/server/dist/server/terminal-worker/terminal-worker.mjs");
-    break;
-  case "worker-process.js":
-    await import("./packages/server/dist/server/server/speech/providers/local/worker-process.js");
-    break;
-  default:
-    if (diskScript) await import(pathToFileURL(requested).href);
-    else await import("./packages/cli/dist/index.js");
-}
+if (requested === "ui-host") {
+  process.argv.splice(2, 1);
+  await import("./packages/desktop-bun/src/ui-host-entry.js");
+} else
+  switch (role) {
+    case "supervisor-entrypoint.js":
+      await import("./packages/server/dist/scripts/supervisor-entrypoint.js");
+      break;
+    case "daemon-worker.js":
+      await import("./packages/server/dist/server/server/daemon-worker.js");
+      break;
+    case "terminal-worker.mjs":
+      await import("./packages/server/dist/server/terminal-worker/terminal-worker.mjs");
+      break;
+    case "worker-process.js":
+      await import("./packages/server/dist/server/server/speech/providers/local/worker-process.js");
+      break;
+    default:
+      if (diskScript) await import(pathToFileURL(requested).href);
+      else await import("./packages/cli/dist/index.js");
+  }
