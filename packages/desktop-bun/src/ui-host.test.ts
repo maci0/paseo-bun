@@ -62,6 +62,13 @@ describe("Elysia desktop UI host", () => {
       (await fetch(host.url + "/api/echo", { headers: { origin: "https://evil.example" } })).status,
     ).toBe(403);
     expect((await fetch(host.url, { headers: { host: "evil.example" } })).status).toBe(403);
+    expect(
+      (
+        await fetch(host.url, {
+          headers: { host: `localhost:${host.server.port}`, origin: host.url },
+        })
+      ).status,
+    ).toBe(200);
     expect((await fetch(host.url + "/%2e%2e%2fsecret")).status).toBe(403);
   });
   test("proxies JSON and binary WebSocket frames without changing wire types", async () => {
