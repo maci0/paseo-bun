@@ -21,7 +21,8 @@ tar -xzf "$archive"
 ```
 
 Keep the entire extracted directory together. Linux needs GTK 3 and WebKitGTK
-4.1 runtime libraries. Node, Bun and Electron installations are not required.
+4.1 runtime libraries. The published desktop binary requires glibc 2.39 or newer
+(for example Ubuntu 24.04). Node, Bun and Electron installations are not required.
 The daemon and Elysia host compile with `bun compile --production --trim`;
 the Tauri shell uses Cargo's release profile with LTO. The React interface runs
 in the system WebKit WebView.
