@@ -32,7 +32,8 @@
     "packages/relay",
     "packages/website",
     "packages/desktop",
-    "packages/cli"
+    "packages/cli",
+    "packages/desktop-bun"
   ],
   "scripts": {
     "dev": "npm run dev:server",
@@ -124,7 +125,8 @@
     "release:minor": "npm run release:check && npm run version:all:minor && npm run release:publish && npm run release:push",
     "release:major": "npm run release:check && npm run version:all:major && npm run release:publish && npm run release:push",
     "build:bun": "bun scripts/build-bun.ts",
-    "test:bun": "bun scripts/test-bun.ts"
+    "test:bun": "bun scripts/test-bun.ts",
+    "build:desktop:bun": "bun scripts/build-desktop-bun.ts"
   },
   "devDependencies": {
     "@types/ws": "^8.5.14",

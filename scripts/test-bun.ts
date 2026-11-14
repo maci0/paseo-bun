@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import {
   mkdirSync,
   mkdtempSync,
@@ -78,6 +78,7 @@ function cli(args: string[], allowFailure = false): string {
     );
   return result.stdout.trim();
 }
+let uiHost: ReturnType<typeof spawn> | null = null;
 try {
   assert.equal(cli(["--version"]), info.version);
   assert.match(cli(["--help"]), /daemon/);
@@ -102,6 +103,45 @@ try {
   }
   assert.deepEqual(JSON.parse(cli(["--host", address, "ls", "--json"])), []);
   cli(["--host", address, "provider", "ls", "--json"]);
+  uiHost = spawn(binary, ["ui-host", "--port", "0", "--daemon-url", `http://${address}`], {
+    cwd: temporary,
+    env,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  const hostReady = await new Promise<{ url: string }>((resolve, reject) => {
+    const timeout = setTimeout(
+      () => reject(new Error("AOT Elysia host readiness timed out")),
+      15_000,
+    );
+    let output = "";
+    uiHost!.once("error", (error) => {
+      clearTimeout(timeout);
+      reject(error);
+    });
+    uiHost!.once("exit", (code) => {
+      clearTimeout(timeout);
+      reject(new Error(`AOT Elysia host exited: ${code}`));
+    });
+    uiHost!.stderr!.on("data", (chunk) => process.stderr.write(chunk));
+    uiHost!.stdout!.on("data", (chunk) => {
+      output += chunk;
+      for (const line of output.split("\n")) {
+        try {
+          const data = JSON.parse(line);
+          if (data.type === "paseo-ui-ready") {
+            clearTimeout(timeout);
+            resolve(data);
+          }
+        } catch {}
+      }
+    });
+  });
+  assert.equal(
+    (await (await fetch(hostReady.url + "/__paseo_ui/health")).json()).framework,
+    "elysia",
+  );
+  assert.deepEqual(JSON.parse(cli(["--host", new URL(hostReady.url).host, "ls", "--json"])), []);
+
   const webResponse = await fetch(`http://${address}/`);
   assert.equal(webResponse.status, 200);
   const html = await webResponse.text();
@@ -166,6 +206,19 @@ try {
   }
   throw error;
 } finally {
+  if (uiHost && uiHost.exitCode === null) {
+    const stopped = new Promise<void>((resolve) => uiHost!.once("exit", () => resolve()));
+    uiHost.kill("SIGTERM");
+    await Promise.race([
+      stopped,
+      new Promise<void>((resolve) =>
+        setTimeout(() => {
+          uiHost!.kill("SIGKILL");
+          resolve();
+        }, 5_000),
+      ),
+    ]);
+  }
   cli(["daemon", "stop", "--home", home, "--force", "--timeout", "2"], true);
 }
 rmSync(temporary, { recursive: true, force: true });

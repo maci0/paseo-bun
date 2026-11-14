@@ -101,3 +101,7 @@ app.json
 
 # Local compiler probes
 .scratch/
+
+# Native Tauri desktop build output
+/packages/desktop-bun/src-tauri/target/
+/packages/desktop-bun/src-tauri/gen/

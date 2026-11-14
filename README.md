@@ -1,6 +1,7 @@
-# paseo-bun
+# Paseo Bun + Elysia + Tauri v2 Edition
 
-Native AOT Paseo CLI and daemon, based on upstream 0.16.0-beta.2. Uses the distribution
+Native AOT Paseo CLI and daemon, an Elysia UI host, and a Tauri v2 desktop shell,
+based on upstream 0.16.0-beta.2. Uses the distribution
 layout and native PTY compatibility fix from [dsh-bun](https://github.com/maci0/dsh-bun).
 
 [Download prereleases](https://github.com/maci0/paseo-bun/releases) ·
@@ -12,14 +13,19 @@ Download, verify and unpack the native AOT build (`--trim` enabled). No Node or 
 
 ```sh
 release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-1
-archive=paseo-bun-0.16.0-beta.2-linux-x64-aot.tar.gz
+archive=paseo-bun-desktop-0.16.0-beta.2-linux-x64-aot.tar.gz
 curl -fLO "$release_url/$archive" &&
 curl -fLO "$release_url/$archive.sha256" &&
 sha256sum -c "$archive.sha256" &&
 tar -xzf "$archive" &&
-./paseo-bun/paseo-bun --version
+./paseo-bun/paseo-bun-desktop
 ```
 
+The desktop archive requires GTK 3 and WebKitGTK 4.1 on Linux.
+See [desktop build and compatibility](docs/bun-desktop.md). The Rust shell and
+Bun services are native AOT; the React UI uses the system WebView.
+
+For the headless CLI/web distribution, see [CLI instructions](docs/bun-dist.md).
 Start a daemon with a separate home:
 
 ```sh

@@ -1,0 +1,26 @@
+[package]
+name = "paseo-bun-desktop"
+version = "0.16.0-beta.2"
+description = "Paseo desktop: Bun AOT, Elysia and Tauri v2"
+authors = ["Paseo Bun contributors"]
+edition = "2021"
+license = "Apache-2.0"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+tauri-plugin-single-instance = "2"
+serde_json = "1"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = "0.2"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
