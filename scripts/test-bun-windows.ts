@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -56,11 +56,41 @@ function cli(args: string[], allowFailure = false) {
     );
   return result.stdout.trim();
 }
+let uiHost: ReturnType<typeof spawn> | null = null;
 try {
   assert.equal(cli(["--version"]), info.version);
   cli(["daemon", "start", "--home", home, "--timeout", "30"]);
   assert.deepEqual(JSON.parse(cli(["--host", address, "ls", "--json"])), []);
   cli(["--host", address, "provider", "ls", "--json"]);
+  uiHost = spawn(binary, ["ui-host", "--port", "0", "--daemon-url", `http://${address}`], {
+    env,
+    cwd: temporary,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  const ready = await new Promise<{ url: string }>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("AOT UI host timed out")), 15000);
+    let output = "";
+    uiHost!.once("error", reject);
+    uiHost!.once("exit", (code) => {
+      clearTimeout(timer);
+      reject(new Error(`AOT UI host exited ${code}`));
+    });
+    uiHost!.stderr!.on("data", (chunk) => process.stderr.write(chunk));
+    uiHost!.stdout!.on("data", (chunk) => {
+      output += chunk;
+      for (const line of output.split("\n")) {
+        try {
+          const data = JSON.parse(line);
+          if (data.type === "paseo-ui-ready") {
+            clearTimeout(timer);
+            resolve(data);
+          }
+        } catch {}
+      }
+    });
+  });
+  assert.equal((await (await fetch(ready.url + "/__paseo_ui/health")).json()).framework, "elysia");
+  assert.deepEqual(JSON.parse(cli(["--host", new URL(ready.url).host, "ls", "--json"])), []);
   assert.equal((await fetch(`http://${address}/`)).status, 200);
   const terminal = JSON.parse(
     cli(["--host", address, "terminal", "create", "--cwd", temporary, "--json"]),
@@ -71,7 +101,7 @@ try {
     "terminal",
     "send-keys",
     terminal.id,
-    "echo paseo-aot-terminal-ok",
+    "echo paseo-aot-terminal-^ok",
     "Enter",
   ]);
   let output = "";
@@ -84,6 +114,10 @@ try {
   cli(["--host", address, "terminal", "kill", terminal.id]);
   console.log("PASS Windows relocated native AOT CLI, daemon, providers, web assets and ConPTY");
 } finally {
+  if (uiHost && uiHost.exitCode === null) {
+    uiHost.kill();
+    await new Promise<void>((resolve) => uiHost!.once("exit", () => resolve()));
+  }
   cli(["daemon", "stop", "--home", home, "--force", "--timeout", "10"], true);
   rmSync(temporary, { recursive: true, force: true });
 }

@@ -12,6 +12,7 @@
 // Run from the repo root, after `npm run build:server`. Requires
 // node_modules populated (the Nix build invokes this post-configHook).
 
+import { isExternalTracePath } from "./trace-path.mjs";
 import { nodeFileTrace } from "@vercel/nft";
 import { glob, readFile, readdir } from "node:fs/promises";
 import { createRequire } from "node:module";
@@ -126,6 +127,28 @@ for (const [importer, specifiers] of runtimeDependencies) {
   for (const specifier of specifiers) requireFrom(importer).resolve(specifier);
 }
 
+const ignoredPatterns = [
+  ".git/**",
+  "dist/**",
+  // Cross-platform native packages for the sherpa speech runtime;
+  // only the host platform package is needed at runtime.
+  "sherpa-onnx-*/**",
+  // Platform-specific clipboard variants; only the host's variant
+  // is needed at runtime, and the package's index.js resolver picks
+  // the right one dynamically.
+  "@mariozechner/clipboard-*/**",
+  // node-fetch optional peer for non-UTF-8 charset decoding; not
+  // loaded in our usage.
+  "encoding/**",
+  // Tests are stripped during the daemon build; nft sometimes still
+  // tries to walk into them via index files. Belt and suspenders.
+  "**/*.test.js",
+  "**/*.e2e.test.js",
+  // The Nix desktop package runs under nixpkgs' Electron. Tracing the npm
+  // package would duplicate the complete Electron distribution in $out.
+  ...(traceDesktop ? ["node_modules/electron/**"] : []),
+];
+
 // Trace.
 const { fileList, warnings } = await nodeFileTrace(entries, {
   ...(process.env.PASEO_TRACE_BUN === "1" ? { conditions: ["bun", "node"] } : {}),
@@ -149,27 +172,9 @@ const { fileList, warnings } = await nodeFileTrace(entries, {
   // sherpa-onnx-${platform}-${arch} package resolution (the host package
   // is copied explicitly above), and a handful of test-only requires that
   // get tree-shaken out by tsc.
-  ignore: [
-    ".git/**",
-    "dist/**",
-    // Cross-platform native packages for the sherpa speech runtime;
-    // only the host platform package is needed at runtime.
-    "sherpa-onnx-*/**",
-    // Platform-specific clipboard variants; only the host's variant
-    // is needed at runtime, and the package's index.js resolver picks
-    // the right one dynamically.
-    "@mariozechner/clipboard-*/**",
-    // node-fetch optional peer for non-UTF-8 charset decoding; not
-    // loaded in our usage.
-    "encoding/**",
-    // Tests are stripped during the daemon build; nft sometimes still
-    // tries to walk into them via index files. Belt and suspenders.
-    "**/*.test.js",
-    "**/*.e2e.test.js",
-    // The Nix desktop package runs under nixpkgs' Electron. Tracing the npm
-    // package would duplicate the complete Electron distribution in $out.
-    ...(traceDesktop ? ["node_modules/electron/**"] : []),
-  ],
+  ignore: (file) =>
+    isExternalTracePath(file) ||
+    ignoredPatterns.some((pattern) => path.matchesGlob(file.split(path.sep).join("/"), pattern)),
 });
 
 // Surface non-trivial trace warnings so the Nix build log captures them.

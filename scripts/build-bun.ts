@@ -21,6 +21,11 @@ function run(command: string, args: string[]) {
     cwd: root,
     stdio: "inherit",
     shell: process.platform === "win32" && command === "npm",
+    env: {
+      ...process.env,
+      PASEO_AOT_BUILD: "1",
+      NODE_OPTIONS: process.env.NODE_OPTIONS ?? "--max-old-space-size=4096",
+    },
   });
 }
 
