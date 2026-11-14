@@ -31,8 +31,8 @@ release, use its matching tag, archive and checksum from the
 From the directory containing the extracted `paseo-bun/` folder:
 
 ```sh
-mkdir -p "$HOME/.local/lib/paseo-bun" "$HOME/.local/bin"
-install_dir=$(mktemp -d "$HOME/.local/lib/paseo-bun/0.16.0-beta.2-aot.XXXXXX")
+mkdir -p "$HOME/.local/bin"
+install_dir=$(mktemp -d "$HOME/.local/bin/paseo-bun-0.16.0-beta.2-aot.XXXXXX")
 cp -a paseo-bun/. "$install_dir/"
 ln -sfn "$install_dir/paseo-bun" "$HOME/.local/bin/paseo-bun"
 export PATH="$HOME/.local/bin:$PATH"
@@ -60,7 +60,7 @@ restart, add `--keep-terminals` to the stop command. Keep older installation
 directories while their processes are still running.
 
 To uninstall, stop the daemon first, remove `~/.local/bin/paseo-bun`, and remove
-only the installation directories under `~/.local/lib/paseo-bun/` you no longer
+only the installation directories matching `~/.local/bin/paseo-bun-*-aot.*` you no longer
 need. Your Paseo home contains configuration and history; keep it unless you
 intend to delete that data.
 
@@ -75,7 +75,7 @@ for that graph, rather than compiling directly from TypeScript source.
 
 Bun AOT is experimental. Linux CLI/daemon, built-in plugin loading, PTY I/O and
 terminal retention are covered by the release smoke test. Voice inference,
-authenticated agent sessions, desktop/mobile and other operating systems are
+authenticated agent sessions, mobile and other operating systems are
 not validated. This archive includes the production web UI. Enable it with
 `paseo-bun daemon config set features.webUi.enabled true --home "$HOME/.paseo-bun"`,
 then restart that daemon and open its HTTP address. A separate Electron desktop

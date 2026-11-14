@@ -1,15 +1,18 @@
-# Paseo Bun + Elysia + Tauri v2 Edition
+# Paseo Bun + Elysia + Tauri v2
 
-Native AOT Paseo CLI and daemon, an Elysia UI host, and a Tauri v2 desktop shell,
-based on upstream 0.16.0-beta.2. Uses the distribution
-layout and native PTY compatibility fix from [dsh-bun](https://github.com/maci0/dsh-bun).
+Paseo **0.16.0-beta.2** with native Bun AOT CLI/daemon, an Elysia UI host,
+a Rust/Tauri v2 desktop window, and our large-history UI performance patch.
+Packaging follows [dsh-bun](https://github.com/evinelias/dsh-bun).
 
-[Download prereleases](https://github.com/maci0/paseo-bun/releases) ·
-[Install, run and update](docs/bun-dist.md) · [Build from source](docs/bun.md)
+[Current release](https://github.com/maci0/paseo-bun/releases/tag/bun-aot-v0.16.0-beta.2-2) ·
+[Desktop instructions](docs/bun-desktop.md) · [CLI instructions](docs/bun-dist.md) ·
+[Build from source](docs/bun.md)
 
-## TL;DR — Linux x64
+## TL;DR — download and start the desktop
 
-Download, verify and unpack the native AOT build (`--trim` enabled). No Node or Bun installation needed:
+Linux x64 only. Requires **glibc 2.39+, GTK 3 and WebKitGTK 4.1**
+(for example Ubuntu 24.04 with those runtime libraries installed).
+No separate Node, Bun or Electron installation is needed.
 
 ```sh
 release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2
@@ -21,260 +24,75 @@ tar -xzf "$archive" &&
 ./paseo-bun/paseo-bun-desktop
 ```
 
-The desktop archive requires GTK 3 and WebKitGTK 4.1 on Linux.
-See [desktop build and compatibility](docs/bun-desktop.md). The Rust shell and
-Bun services are native AOT; the React UI uses the system WebView.
+The desktop reuses your local daemon, or starts one if absent. Closing the window
+leaves the daemon and agents running. The local daemon is identified by its
+persisted server ID; other connected hosts remain remote.
 
-For the headless CLI/web distribution, see [CLI instructions](docs/bun-dist.md).
-Start a daemon with a separate home:
+## Downloads
+
+All assets below are from **bun-aot-v0.16.0-beta.2-2**, a public prerelease.
+
+| Package                               | Archive                                                                                                                                                 | Checksum                                                                                                                                             |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tauri desktop + CLI + daemon + web UI | [Linux x64, 96 MiB](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-desktop-0.16.0-beta.2-linux-x64-aot.tar.gz) | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-desktop-0.16.0-beta.2-linux-x64-aot.tar.gz.sha256) |
+| Headless CLI + daemon + web UI        | [Linux x64, 95 MiB](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-0.16.0-beta.2-linux-x64-aot.tar.gz)         | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-0.16.0-beta.2-linux-x64-aot.tar.gz.sha256)         |
+
+Keep the **entire extracted directory** together: it includes native dependencies,
+plugins, notices and web assets. Both packages extract to `paseo-bun/`; unpack
+into separate directories if comparing them. Older builds remain on the
+[releases page](https://github.com/maci0/paseo-bun/releases).
+
+## Install under ~/.local/bin
+
+After extracting the desktop archive:
 
 ```sh
-./paseo-bun/paseo-bun daemon start --home "$HOME/.paseo-bun"
+mkdir -p "$HOME/.local/bin" &&
+install_dir=$(mktemp -d "$HOME/.local/bin/paseo-bun-desktop.XXXXXX") &&
+cp -a paseo-bun/. "$install_dir/" &&
+ln -sfn "$install_dir/paseo-bun" "$HOME/.local/bin/paseo-bun" &&
+ln -sfn "$install_dir/paseo-bun-desktop" "$HOME/.local/bin/paseo-bun-desktop"
+export PATH="$HOME/.local/bin:$PATH"
+paseo-bun-desktop
 ```
 
-The archive also includes the optimized web UI.
-[Enable the web UI](docs/bun-dist.md#scope) to use it in a browser.
+See the [desktop guide](docs/bun-desktop.md) for runtime behavior and the
+[CLI guide](docs/bun-dist.md) for headless installation, updates and uninstalling.
+Your existing Paseo configuration/history lives in `~/.paseo` by default.
 
-Keep the entire extracted directory together. For a global command, upgrades or
-uninstalling, follow the [installation instructions](docs/bun-dist.md).
-This is an experimental CLI/daemon preview. Dynamic plugins remain interpreted;
-voice and authenticated agent sessions are not yet validated.
+## AOT and performance
 
----
+Bun services use **native AOT with `--production --trim`**. The Rust shell uses
+Cargo release optimizations and LTO. React runs in the system WebKit WebView;
+dynamic plugins, generated JavaScript and external scripts remain interpreted.
+The daemon retains upstream Express handlers and protocol; Elysia hosts the
+desktop UI and HTTP/WebSocket proxy.
 
-<p align="center">
-  <img src="packages/website/public/logo.svg" width="64" height="64" alt="Paseo logo">
-</p>
+Our indexed history hydration avoids repeated scans of a growing timeline.
+An isolated Chrome benchmark of 10,000 tool events measured **6,708.5 ms → 5.8 ms**.
+This is a synthetic hydration measurement, not whole-app or WebKit performance.
+[Measurements and validation](docs/bun-desktop.md#included-ui-performance-patch) ·
+[Upstream-ready patch](https://github.com/maci0/paseo/tree/perf/large-ui-data).
 
-<h1 align="center">Paseo</h1>
+## Build and compatibility
 
-<p align="center">
-  <a href="README.md">English</a> ·
-  <a href="README.zh-CN.md">简体中文</a> ·
-  <a href="README.ja.md">日本語</a> ·
-  <a href="README.ko.md">한국어</a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/getpaseo/paseo/stargazers">
-    <img src="https://img.shields.io/github/stars/getpaseo/paseo?style=flat&logo=github" alt="GitHub stars">
-  </a>
-  <a href="https://github.com/getpaseo/paseo/releases">
-    <img src="https://img.shields.io/github/v/release/getpaseo/paseo?style=flat&logo=github" alt="GitHub release">
-  </a>
-  <a href="https://x.com/moboudra">
-    <img src="https://img.shields.io/badge/%40moboudra-555?logo=x" alt="X">
-  </a>
-  <a href="https://discord.gg/jz8T2uahpH">
-    <img src="https://img.shields.io/badge/Discord-555?logo=discord" alt="Discord">
-  </a>
-  <a href="https://www.reddit.com/r/PaseoAI/">
-    <img src="https://img.shields.io/badge/Reddit-555?logo=reddit" alt="Reddit">
-  </a>
-</p>
-
-<p align="center">One interface for Claude Code, Codex, Copilot, OpenCode, Pi, Antigravity, and Muse Code agents.</p>
-
-<p align="center">
-  <img src="https://paseo.sh/hero-mockup.png" alt="Paseo app screenshot" width="100%">
-</p>
-
-<p align="center">
-  <img src="https://paseo.sh/mobile-mockup.png" alt="Paseo mobile app" width="100%">
-</p>
-
-Paseo is an open source agentic development environment for desktop, mobile, web, and CLI. Open the desktop app and work: agents, editor, terminals, diffs, pull requests, and a browser in one window. Run many agents at once, each in its own worktree, on one machine or several. The mobile app is the full app, native on iOS and Android.
-
-- **Parallel agents:** Run many agents at once, each in its own worktree.
-- **Built-in orchestration:** Agents in Paseo can create worktrees, launch other agents, and talk to them, across providers.
-- **Complete development workflow:** Edit files, review diffs, open pull requests, and run terminals, in split panes you arrange how you want.
-- **Self-hosted:** Agents run on your machine with your full dev environment. Use your tools, your configs, and your skills.
-- **Multi-provider:** Claude Code, Codex, Copilot, OpenCode, Pi, Antigravity, and Muse Code through the same interface. Pick the right model for each job.
-- **Voice control:** Dictate tasks or talk through problems in voice mode. Hands-free when you need it.
-- **Cross-device:** iOS, Android, desktop, web, and CLI. Start work at your desk, check in from your phone, script it from the terminal.
-- **Privacy-first:** No telemetry, tracking, or forced login. Remote access uses an optional end-to-end encrypted relay.
-
-[Run parallel tasks in Paseo](https://paseo.sh/docs/parallel-development): start agents in separate worktrees, review their diffs, run each app, and check it in the built-in browser.
-
-## Sponsors
-
-<!-- Sponsors: one cell per sponsor in the order of packages/website/src/data/sponsors.ts, then "become a sponsor" cells up to three. -->
-<table>
-  <tr valign="top">
-    <td align="center" width="33%"><a href="https://hoplite.sh/?utm_source=paseo&utm_medium=readme&utm_campaign=sponsor"><picture><source media="(prefers-color-scheme: dark)" srcset="packages/website/public/sponsors/hoplite-on-dark.svg"><img src="packages/website/public/sponsors/hoplite-on-light.svg" alt="Hoplite" height="56"></picture></a><br><sub>Cloud coding agents</sub></td>
-    <td align="center" width="33%"><a href="https://encore.dev/?utm_source=paseo&utm_medium=readme&utm_campaign=sponsor"><picture><source media="(prefers-color-scheme: dark)" srcset="packages/website/public/sponsors/encore-on-dark.svg"><img src="packages/website/public/sponsors/encore-on-light.svg" alt="Encore" height="56"></picture></a><br><sub>Encore lets AI agents ship to production safely, at scale, in your own cloud.</sub></td>
-    <td align="center" width="33%"><a href="https://paseo.sh/sponsor">Become a sponsor</a></td>
-  </tr>
-</table>
-
-## Plugins
-
-Plugins run on the daemon and show up in every client you connect, with the same UI on desktop, web,
-iOS, and Android. Write a plugin once and it is on your phone.
-
-- **UI:** screens, sidebar items, workspace panels, Command Center items, slash commands, composer pills, attachment sources, timeline items, themes.
-- **Agent lifecycle:** change configuration, environment, and MCP servers, answer permissions, follow up when a turn ends.
-- **Providers:** add a coding agent as a provider.
-
-Install from the registry with `paseo plugin add owner/slug`, or from Git or a local directory.
-
-**[Browse plugins](https://paseo.sh/plugins)** · **[Plugin docs](https://paseo.sh/docs/plugins)**
-
-Plugins run with access to your daemon machine and inside connected clients; install only code you trust.
-
-## Getting Started
-
-Paseo runs a local server called the daemon that manages your coding agents. Clients like the desktop app, mobile app, web app, and CLI connect to it.
-
-### Prerequisites
-
-You need at least one agent CLI installed and configured with your credentials:
-
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
-- [Codex](https://github.com/openai/codex)
-- [GitHub Copilot](https://github.com/features/copilot/cli/)
-- [OpenCode](https://github.com/anomalyco/opencode)
-- [Pi](https://pi.dev)
-- [Antigravity](https://paseo.sh/docs/supported-providers/antigravity)
-- [Muse Code](https://paseo.sh/docs/supported-providers/muse-code)
-- [fx](https://paseo.sh/docs/supported-providers/fx)
-- [Hoplite](https://paseo.sh/docs/supported-providers/hoplite)
-
-Paseo also runs Cursor, Gemini CLI, and many other agents. See [Supported providers](https://paseo.sh/docs/supported-providers) for the full list and setup steps.
-
-### Desktop app (recommended)
-
-Download it from [paseo.sh/download](https://paseo.sh/download) or the [GitHub releases page](https://github.com/getpaseo/paseo/releases). Open the app and the daemon starts automatically. Nothing else to install.
-
-To connect from your phone, open **Settings → your host → Pair Device**.
-
-### Server
-
-For a server, a VM, or any machine without the desktop app. Install the CLI and start the daemon:
-
-```bash
-npm install -g @getpaseo/cli
-paseo
+```sh
+npm ci --ignore-scripts --no-audit --no-fund
+npm run postinstall
+bun run build:desktop:bun
+bun run test:bun
 ```
 
-Paseo starts, then asks whether to enable the end-to-end encrypted relay for device pairing. If you decline, connect directly over TCP, Tailscale, or another VPN. The desktop, mobile, and web apps connect to this daemon like any other host.
+Install the AOT-capable Bun, Rust and Linux development prerequisites described
+in the [desktop build guide](docs/bun-desktop.md#build). For the headless target,
+use `bun run build:bun`. Archives and SHA-256 files are written to `dist/`;
+`build-info.json` and `desktop-info.json` record compiler and source provenance.
+[GitHub Actions](https://github.com/maci0/paseo-bun/actions/workflows/bun.yml)
+builds and tests both distributions.
 
-For full setup and configuration, see:
+This is an experimental prerelease. Electron-specific IPC, embedded Chromium
+browser automation and the Electron updater are not included. Voice inference
+and authenticated model turns have not been validated. macOS, Windows and ARM
+release assets are not provided.
 
-- [Docs](https://paseo.sh/docs)
-- [Connectivity guide](https://paseo.sh/docs/connectivity)
-- [Configuration reference](https://paseo.sh/docs/configuration)
-
-### Docker
-
-Run the Paseo daemon and self-hosted web UI in Docker:
-
-```bash
-docker run -d --name paseo \
-  -p 6767:6767 \
-  -e PASEO_PASSWORD=change-me \
-  -v "$PWD/paseo-home:/home/paseo" \
-  -v "$PWD:/workspace" \
-  ghcr.io/getpaseo/paseo:latest
-```
-
-Open `http://localhost:6767` after it starts. Extend the base image with the agent CLIs you use, then provide credentials through environment variables or the persistent `/home/paseo` volume. See the [Docker documentation](docs/docker.md) for full setup details.
-
-## CLI
-
-Everything you can do in the app, you can do from the terminal.
-
-```bash
-paseo run --provider claude/opus-4.6 "implement user authentication"
-paseo run --provider codex/gpt-5.5 --worktree feature-x "implement feature X"
-
-paseo ls                           # list running agents
-paseo attach abc123                # stream live output
-paseo send abc123 "also add tests" # follow-up task
-
-# run on a remote daemon; --cwd is a path on that host
-paseo run --host workstation.local:6767 --cwd /workspace "run the full test suite"
-```
-
-See the [full CLI reference](https://paseo.sh/docs/cli) for more.
-
-## TypeScript SDK
-
-Build issue integrations, dashboards, and orchestration services with `@getpaseo/client`:
-
-```ts
-import { createPaseoClient } from "@getpaseo/client";
-
-const client = createPaseoClient({ url: "ws://127.0.0.1:6767/ws" });
-await client.connect();
-
-const agent = await client.agents.create({
-  config: { provider: "codex/gpt-5.5" },
-  cwd: "/Users/me/dev/storefront",
-  prompt: "Review the current diff and name the riskiest change.",
-});
-
-const result = await agent.waitForFinish();
-console.log(result.lastMessage);
-
-await client.close();
-```
-
-See the [SDK quickstart](https://paseo.sh/docs/sdk/quickstart), [recipes](https://paseo.sh/docs/sdk/recipes), and [API reference](https://paseo.sh/docs/sdk/reference).
-
-## Skills
-
-Skills teach your agent to use Paseo to orchestrate other agents.
-
-```bash
-npx skills add getpaseo/paseo
-```
-
-Then use them in any agent conversation:
-
-- `/paseo-handoff` — hand off work between agents. I use this to plan with Claude and then handoff to Codex to implement.
-- `/paseo-advisor` — spin up a single agent as an advisor for a second opinion, without delegating the work itself.
-- `/paseo-committee` — form a committee of two contrasting agents to step back, do root cause analysis, and produce a plan.
-
-## Development
-
-Quick monorepo package map:
-
-- `packages/server`: Paseo daemon (agent process orchestration, WebSocket API, MCP server)
-- `packages/app`: Expo client (iOS, Android, web)
-- `packages/cli`: `paseo` CLI for daemon and agent workflows
-- `packages/desktop`: Electron desktop app
-- `packages/relay`: Relay transport and encryption used by the daemon and clients
-- `packages/website`: Marketing site and documentation (`paseo.sh`)
-
-Common commands:
-
-```bash
-# run all local dev services
-npm run dev
-
-# run individual surfaces
-npm run dev:server
-npm run dev:app
-npm run dev:desktop
-npm run dev:website
-
-# build the server stack
-npm run build:server
-
-# repo-wide checks
-npm run typecheck
-```
-
-## Support Paseo
-
-Paseo is an independent project used by tens of thousands of developers daily, built by one person and funded by the people who use it. Support the work on [GitHub Sponsors](https://github.com/sponsors/boudra). Companies can [sponsor Paseo](https://paseo.sh/sponsor#spot) monthly and have their logo shown at the top of this README and on the paseo.sh homepage and docs.
-
-## Related projects
-
-- [getpaseo/paseo-relay](https://github.com/getpaseo/paseo-relay) — official distributed relay, written in Elixir
-- [paseo-vscode](https://marketplace.visualstudio.com/items?itemName=hinnes.paseo-vscode) — VS Code extension
-
-## License
-
-Apache-2.0
+[Upstream Paseo README](README.upstream.md) · [License](LICENSE)
