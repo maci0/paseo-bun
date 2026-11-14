@@ -26,6 +26,9 @@ Start a daemon with a separate home:
 ./paseo-bun/paseo-bun daemon start --home "$HOME/.paseo-bun"
 ```
 
+The archive also includes the optimized web UI.
+[Enable the web UI](docs/bun-dist.md#scope) to use it in a browser.
+
 Keep the entire extracted directory together. For a global command, upgrades or
 uninstalling, follow the [installation instructions](docs/bun-dist.md).
 This is an experimental CLI/daemon preview. Dynamic plugins remain interpreted;

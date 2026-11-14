@@ -22,6 +22,9 @@ bun test scripts/aot-module-path.test.ts
 bun run test:bun
 ```
 
+The build also exports the optimized production web UI, including the indexed
+large-tool-history hydration fix.
+
 The build produces:
 
 ```text
@@ -88,5 +91,6 @@ the supervisor and daemon execute the packaged binary.
 
 The smoke test disables relay, MCP and speech, and inherits no provider
 credentials. Voice inference, authenticated agent sessions, desktop/mobile,
-bundled web UI and non-Linux targets are not validated. GitHub's Bun workflow
+non-Linux targets are not validated. The bundled web UI HTML and JavaScript assets
+are checked by the archive smoke test. GitHub's Bun workflow
 runs these checks and uploads the archive plus checksum as an artifact.
