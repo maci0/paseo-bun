@@ -46,7 +46,10 @@ if (process.platform === "darwin") {
     path.join(root, "packages/desktop/assets/icon.icns"),
     path.join(contents, "Resources/icon.icns"),
   );
-  cpSync(output, path.join(contents, "Resources/runtime"), { recursive: true });
+  cpSync(output, path.join(contents, "Resources/runtime"), {
+    recursive: true,
+    verbatimSymlinks: true,
+  });
   mkdirSync(path.join(contents, "MacOS"));
   cpSync(path.join(output, "paseo-bun-desktop"), path.join(contents, "MacOS/paseo-bun-desktop"));
   writeFileSync(
