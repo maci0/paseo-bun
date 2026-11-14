@@ -159,7 +159,7 @@ const info = {
 writeFileSync(path.join(output, "build-info.json"), JSON.stringify(info, null, 2) + "\n");
 cpSync(path.join(root, "docs/bun-dist.md"), path.join(output, "README.md"));
 const archivePath = path.join(root, "dist", archive);
-run("tar", ["-C", path.join(root, "dist"), "-czf", archivePath, "paseo-bun"]);
+run("tar", ["-C", path.join(root, "dist"), "-czf", path.relative(root, archivePath), "paseo-bun"]);
 const checksum = createHash("sha256").update(readFileSync(archivePath)).digest("hex");
 writeFileSync(archivePath + ".sha256", `${checksum}  ${archive}\n`);
 console.log(`Distribution: ${archivePath} (SHA-256 alongside)`);

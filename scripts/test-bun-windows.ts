@@ -18,7 +18,15 @@ assert.equal(
     .split(/\s+/)[0],
 );
 const temporary = mkdtempSync(path.join(tmpdir(), "paseo-aot-"));
-assert.equal(spawnSync("tar", ["-xzf", archive, "-C", temporary]).status, 0);
+assert.equal(
+  spawnSync(path.join(process.env.SystemRoot!, "System32/tar.exe"), [
+    "-xzf",
+    archive,
+    "-C",
+    temporary,
+  ]).status,
+  0,
+);
 const binary = path.join(temporary, "paseo-bun/paseo-bun.exe");
 const home = path.join(temporary, "home");
 const { mkdirSync } = await import("node:fs");
