@@ -66,7 +66,9 @@ function resolvedPackageFiles(importer, specifier) {
 // spawn-helper lives beside the selected addon; retain the files in that dir.
 const terminalRequire = requireFrom(terminalModule);
 const ptyLoader = terminalRequire.resolve("node-pty/lib/utils");
-const { dir: ptyNativeDir } = terminalRequire(ptyLoader).loadNativeModule("pty");
+const { dir: ptyNativeDir } = terminalRequire(ptyLoader).loadNativeModule(
+  process.platform === "win32" ? "conpty" : "pty",
+);
 const ptyNativeRoot = path.resolve(path.dirname(ptyLoader), ptyNativeDir);
 const ptyNativeFiles = (await readdir(ptyNativeRoot, { withFileTypes: true }))
   .filter((entry) => entry.isFile())
@@ -126,9 +128,7 @@ for (const [importer, specifiers] of runtimeDependencies) {
 
 // Trace.
 const { fileList, warnings } = await nodeFileTrace(entries, {
-  ...(process.env.PASEO_TRACE_BUN === "1"
-    ? { conditions: ["bun", "node"] }
-    : {}),
+  ...(process.env.PASEO_TRACE_BUN === "1" ? { conditions: ["bun", "node"] } : {}),
   base: REPO_ROOT,
   async readFile(file) {
     let source;

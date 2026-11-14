@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [bun]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing release to upload validated assets to
+        type: string
+        default: bun-aot-v0.16.0-beta.2-2
 
 permissions:
   contents: read
@@ -15,9 +20,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
+  build:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            platform: linux-x64
+          - runner: macos-15
+            platform: darwin-arm64
+          - runner: macos-15-intel
+            platform: darwin-x64
+          - runner: windows-2022
+            platform: win32-x64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,7 +50,8 @@ jobs:
         with:
           bun-version: canary
       - uses: dtolnay/rust-toolchain@stable
-      - run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libssl-dev librsvg2-dev pkg-config
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libssl-dev librsvg2-dev pkg-config
       - run: bun --revision
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run postinstall
@@ -36,11 +59,19 @@ jobs:
       - run: bun test packages/desktop-bun/src/ui-host.test.ts
       - run: npx vitest run --config packages/server/vitest.config.ts packages/server/src/server/paseo-env.test.ts
       - run: bun test scripts/aot-module-path.test.ts
-      - run: bun run test:bun
+      - if: runner.os != 'Windows'
+        run: bun run test:bun
+      - if: runner.os == 'Windows'
+        run: bun scripts/test-bun-windows.ts
       - uses: actions/upload-artifact@v4
         with:
-          name: paseo-bun-linux-x64-aot
+          name: paseo-bun-${{ matrix.platform }}-aot
           path: |
             dist/*-aot.tar.gz
             dist/*-aot.tar.gz.sha256
           if-no-files-found: error
+      - if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: gh release upload "$RELEASE_TAG" dist/*-aot.tar.gz dist/*-aot.tar.gz.sha256 --repo "$GITHUB_REPOSITORY" --clobber
