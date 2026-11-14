@@ -110,6 +110,13 @@ const additionalInputs = [
   // Server runtime config files (read by path, not require)
   "packages/server/.env.example",
   ...ptyNativeFiles,
+  ...(process.platform === "win32"
+    ? [
+        "packages/server/node_modules/node-pty/lib/worker/**",
+        "packages/server/node_modules/node-pty/lib/shared/**",
+        "packages/server/node_modules/node-pty/lib/conpty_console_list_agent.js",
+      ]
+    : []),
   // Resolve native speech packages from the same modules as the runtime.
   resolvedPackageFiles(sherpaModule, "sherpa-onnx-node"),
   resolvedPackageFiles(sherpaEnvModule, sherpaPlatformPackageName()),

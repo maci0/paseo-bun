@@ -121,6 +121,14 @@ try {
   assert.match(output, /paseo-aot-terminal-ok/);
   cli(["--host", address, "terminal", "kill", terminal.id]);
   console.log("PASS Windows relocated native AOT CLI, daemon, providers, web assets and ConPTY");
+} catch (error) {
+  console.error("Windows native smoke failure:", error);
+  for (const name of ["daemon.log", "terminal-worker.log"]) {
+    try {
+      console.error(name, readFileSync(path.join(home, name), "utf8").slice(-16000));
+    } catch {}
+  }
+  throw error;
 } finally {
   if (uiHost && uiHost.exitCode === null) {
     uiHost.kill();
