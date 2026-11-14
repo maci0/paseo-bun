@@ -127,7 +127,7 @@ for (const [importer, specifiers] of runtimeDependencies) {
 // Trace.
 const { fileList, warnings } = await nodeFileTrace(entries, {
   ...(process.env.PASEO_TRACE_BUN === "1"
-    ? { conditions: ["bun", "node", "import", "require", "default"] }
+    ? { conditions: ["bun", "node"] }
     : {}),
   base: REPO_ROOT,
   async readFile(file) {
