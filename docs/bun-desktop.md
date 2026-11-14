@@ -11,7 +11,10 @@ Download matching `paseo-bun-desktop-*-linux-x64-aot.tar.gz` and `.sha256` asset
 from https://github.com/maci0/paseo-bun/releases, verify the checksum and extract:
 
 ```sh
+release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-1
 archive=paseo-bun-desktop-0.16.0-beta.2-linux-x64-aot.tar.gz
+curl -fLO "$release_url/$archive"
+curl -fLO "$release_url/$archive.sha256"
 sha256sum -c "$archive.sha256"
 tar -xzf "$archive"
 ./paseo-bun/paseo-bun-desktop
@@ -76,3 +79,28 @@ Paseo protocol. Electron-specific integrations, including its embedded Chromium
 browser automation, Electron updater and desktop IPC, are not implemented by
 this first Tauri target. Dynamic plugins and external scripts remain interpreted
 by Bun. The Rust shell and the Bun application graph are native AOT.
+
+## Included UI performance patch
+
+History hydration previously scanned and copied the growing timeline for every
+tool update. Consecutive tool-call runs now use an identity index and an owned
+hydration buffer; live updates retain their immutable behavior.
+
+On this development machine, isolated Chrome CPU profiling of the actual
+hydration function measured:
+
+| Tool events |   Upstream | Patched |
+| ----------- | ---------: | ------: |
+| 1,000       |      78 ms |  1.1 ms |
+| 5,000       |   1,642 ms |  3.1 ms |
+| 10,000      | 6,708.5 ms |  5.8 ms |
+
+These are synthetic hydration timings, not whole-app load times or WebKit
+measurements. The patch passed 245 related tests and app typechecking. The
+existing long-history browser streaming test passed with React commit p95
+between 7.8 and 8.7 ms across three samples.
+
+The upstream-ready change is on
+[perf/large-ui-data](https://github.com/maci0/paseo/tree/perf/large-ui-data).
+Run its synthetic benchmark with the app Vitest configuration and
+`packages/app/src/types/hydration.bench.ts`.
