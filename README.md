@@ -10,6 +10,10 @@ Packaging follows [dsh-bun](https://github.com/evinelias/dsh-bun).
 
 ## TL;DR — download and start the desktop
 
+Choose your platform in the [downloads table](#downloads).
+
+### Linux x64
+
 Linux x64 only. Requires **glibc 2.39+, GTK 3 and WebKitGTK 4.1**
 (for example Ubuntu 24.04 with those runtime libraries installed).
 No separate Node, Bun or Electron installation is needed.
@@ -23,6 +27,39 @@ sha256sum -c "$archive.sha256" &&
 tar -xzf "$archive" &&
 ./paseo-bun/paseo-bun-desktop
 ```
+
+### macOS
+
+Download the `darwin-arm64` archive for Apple Silicon or `darwin-x64` for Intel,
+plus its matching checksum. Verify and extract, then open `paseo-bun/Paseo Bun.app`.
+For example, on Apple Silicon (use `darwin-x64` for Intel):
+
+```sh
+release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2
+archive=paseo-bun-desktop-0.16.0-beta.2-darwin-arm64-aot.tar.gz
+curl -fLO "$release_url/$archive" &&
+curl -fLO "$release_url/$archive.sha256" &&
+shasum -a 256 -c "$archive.sha256" &&
+tar -xzf "$archive" &&
+open "paseo-bun/Paseo Bun.app"
+```
+
+Move the entire `.app` to Applications to install it. Builds are ad-hoc signed,
+without Apple notarization; Gatekeeper may require approval in System Settings.
+
+### Windows x64
+
+Download the `win32-x64` archive and its checksum. Compare the SHA-256 using
+`Get-FileHash -Algorithm SHA256 <archive>`, then extract the entire directory:
+
+```powershell
+tar -xzf paseo-bun-desktop-0.16.0-beta.2-win32-x64-aot.tar.gz
+.\paseo-bun\paseo-bun-desktop.exe
+```
+
+Requires Microsoft WebView2 Runtime. Builds are not Authenticode signed, so
+Windows may display a publisher warning. Keep all DLLs and other assets beside
+the executables. No Node or Bun installation is required.
 
 The desktop reuses your local daemon, or starts one if absent. Closing the window
 leaves the daemon and agents running. The local daemon is identified by its
@@ -38,11 +75,11 @@ All assets below are from **bun-aot-v0.16.0-beta.2-2**, a public beta release.
 | Headless CLI + daemon + web UI        | [Linux x64, 95 MiB](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-0.16.0-beta.2-linux-x64-aot.tar.gz)         | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-0.16.0-beta.2-linux-x64-aot.tar.gz.sha256)         |
 
 Keep the **entire extracted directory** together: it includes native dependencies,
-plugins, notices and web assets. Both packages extract to `paseo-bun/`; unpack
+plugins, notices and web assets. Both package types extract to `paseo-bun/`; unpack
 into separate directories if comparing them. Older builds remain on the
 [releases page](https://github.com/maci0/paseo-bun/releases).
 
-## Install under ~/.local/bin
+## Install under ~/.local/bin (Linux)
 
 After extracting the desktop archive:
 
@@ -92,7 +129,7 @@ builds and tests both distributions.
 
 This is an experimental prerelease. Electron-specific IPC, embedded Chromium
 browser automation and the Electron updater are not included. Voice inference
-and authenticated model turns have not been validated. macOS, Windows and ARM
-release assets are not provided.
+and authenticated model turns have not been validated. macOS and Windows builds are not notarized or publisher-signed.
+Interactive desktop workflows on those systems still need manual validation.
 
 [Upstream Paseo README](README.upstream.md) · [License](LICENSE)
