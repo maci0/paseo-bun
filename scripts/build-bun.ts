@@ -23,6 +23,7 @@ function run(command: string, args: string[]) {
 run("npm", ["run", "build:server"]);
 run("npm", ["run", "build:web", "--workspace=@getpaseo/app"]);
 const files = execFileSync("node", ["scripts/trace-daemon.mjs"], {
+  env: { ...process.env, PASEO_TRACE_BUN: "1" },
   cwd: root,
   encoding: "utf8",
   maxBuffer: 32 * 1024 * 1024,
