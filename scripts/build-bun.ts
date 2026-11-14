@@ -17,7 +17,11 @@ import { createHash } from "node:crypto";
 const root = path.resolve(import.meta.dir, "..");
 const output = path.join(root, "dist/paseo-bun");
 function run(command: string, args: string[]) {
-  execFileSync(command, args, { cwd: root, stdio: "inherit" });
+  execFileSync(command, args, {
+    cwd: root,
+    stdio: "inherit",
+    shell: process.platform === "win32" && command === "npm",
+  });
 }
 
 run("npm", ["run", "build:server"]);
@@ -29,9 +33,11 @@ const files = execFileSync("node", ["scripts/trace-daemon.mjs"], {
   maxBuffer: 32 * 1024 * 1024,
 })
   .trim()
-  .split("\n");
+  .split(/\r?\n/)
+  .map((file) => file.replaceAll("\\", "/"));
 rmSync(output, { recursive: true, force: true });
 mkdirSync(output, { recursive: true });
+const windowsLinks: Array<[string, string]> = [];
 for (const file of files) {
   if (!(file.startsWith("node_modules/") || file.startsWith("packages/"))) continue;
   const source = path.resolve(root, file);
@@ -45,7 +51,9 @@ for (const file of files) {
     const target = path.resolve(path.dirname(source), readlinkSync(source));
     if (!target.startsWith(root + path.sep))
       throw new Error(`Runtime link escaped checkout: ${file}`);
-    symlinkSync(path.relative(path.dirname(source), target), destination);
+    if (process.platform === "win32")
+      windowsLinks.push([path.resolve(output, path.relative(root, target)), destination]);
+    else symlinkSync(path.relative(path.dirname(source), target), destination);
   } else if (stat.isDirectory()) mkdirSync(destination, { recursive: true });
   else cpSync(source, destination);
   if (path.basename(file) === "package.json") {
@@ -72,22 +80,24 @@ cpSync(
   { recursive: true },
 );
 // dsh-bun's PTY adapter retries EAGAIN instead of closing an idle terminal.
-const ptyLibrary = path.join(output, "packages/server/node_modules/node-pty/lib");
-const unixTerminal = path.join(ptyLibrary, "unixTerminal.js");
-const source = readFileSync(unixTerminal, "utf8");
-if (!source.includes("new tty.ReadStream(term.fd)"))
-  throw new Error("node-pty stream construction changed");
-writeFileSync(
-  unixTerminal,
-  source.replace(
-    /new tty\.ReadStream\((term\.(?:fd|master|slave))\)/g,
-    'process.versions.bun ? require("./bunReadStream").createReadStream($1) : new tty.ReadStream($1)',
-  ),
-);
-cpSync(
-  path.join(root, "scripts/node-pty-bun-readstream.cjs"),
-  path.join(ptyLibrary, "bunReadStream.js"),
-);
+if (process.platform !== "win32") {
+  const ptyLibrary = path.join(output, "packages/server/node_modules/node-pty/lib");
+  const unixTerminal = path.join(ptyLibrary, "unixTerminal.js");
+  const source = readFileSync(unixTerminal, "utf8");
+  if (!source.includes("new tty.ReadStream(term.fd)"))
+    throw new Error("node-pty stream construction changed");
+  writeFileSync(
+    unixTerminal,
+    source.replace(
+      /new tty\.ReadStream\((term\.(?:fd|master|slave))\)/g,
+      'process.versions.bun ? require("./bunReadStream").createReadStream($1) : new tty.ReadStream($1)',
+    ),
+  );
+  cpSync(
+    path.join(root, "scripts/node-pty-bun-readstream.cjs"),
+    path.join(ptyLibrary, "bunReadStream.js"),
+  );
+}
 // Preserve disk asset locations while compiling the application graph to native code.
 function rebaseModules(directory: string) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
@@ -103,6 +113,7 @@ function rebaseModules(directory: string) {
   }
 }
 rebaseModules(path.join(output, "packages"));
+for (const [target, destination] of windowsLinks) cpSync(target, destination, { recursive: true });
 cpSync(path.join(root, "scripts/aot-entry.js"), path.join(output, "aot-entry.js"));
 execFileSync(
   process.execPath,
@@ -115,7 +126,7 @@ execFileSync(
     "--trim",
     "--aot-allow-code-from-disk",
     "--outfile",
-    "paseo-bun",
+    process.platform === "win32" ? "paseo-bun.exe" : "paseo-bun",
   ],
   { cwd: output, stdio: "inherit" },
 );
