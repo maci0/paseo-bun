@@ -70,9 +70,9 @@ const { dir: ptyNativeDir } = terminalRequire(ptyLoader).loadNativeModule(
   process.platform === "win32" ? "conpty" : "pty",
 );
 const ptyNativeRoot = path.resolve(path.dirname(ptyLoader), ptyNativeDir);
-const ptyNativeFiles = (await readdir(ptyNativeRoot, { withFileTypes: true }))
-  .filter((entry) => entry.isFile())
-  .map((entry) => path.join(ptyNativeRoot, entry.name));
+const ptyNativeFiles = (await readdir(ptyNativeRoot, { withFileTypes: true })).map((entry) =>
+  path.join(ptyNativeRoot, entry.name, ...(entry.isDirectory() ? ["**"] : [])),
+);
 
 // Daemon entry points. Workers forked into their own Node processes have
 // independent require trees; nft does not follow fork boundaries, so trace
