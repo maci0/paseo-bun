@@ -8,7 +8,7 @@ const cleanup: Array<() => void> = [];
 afterEach(() => {
   while (cleanup.length) cleanup.pop()!();
 });
-function fixture() {
+function fixture(localServerId: string | null = null) {
   const root = mkdtempSync(path.join(tmpdir(), "paseo-elysia-test-"));
   writeFileSync(
     path.join(root, "index.html"),
@@ -37,6 +37,7 @@ function fixture() {
     webRoot: root,
     daemonUrl: `http://127.0.0.1:${backend.port}`,
     port: 0,
+    localServerId,
   });
   cleanup.push(() => host.stop());
   return host;
@@ -55,6 +56,16 @@ describe("Elysia desktop UI host", () => {
     expect(await (await fetch(host.url + "/__paseo_ui/health")).json()).toMatchObject({
       framework: "elysia",
     });
+  });
+  test("exposes only the explicitly supplied local daemon identity", async () => {
+    const host = fixture("srv_local");
+    expect(await (await fetch(host.url)).text()).toContain(
+      'window.__PASEO_LOCAL_DAEMON_SERVER_ID__="srv_local"',
+    );
+    const remote = fixture();
+    expect(await (await fetch(remote.url)).text()).toContain(
+      "window.__PASEO_LOCAL_DAEMON_SERVER_ID__=null",
+    );
   });
   test("rejects foreign origins, rebound hosts and traversal", async () => {
     const host = fixture();

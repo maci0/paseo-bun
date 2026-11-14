@@ -3,7 +3,7 @@ import WebSocket from "ws";
 import path from "node:path";
 import { MAX_WEBSOCKET_MESSAGE_BYTES } from "@getpaseo/protocol/websocket-message-limit";
 
-export function createUiHost({ webRoot, daemonUrl, port = 6769 }) {
+export function createUiHost({ webRoot, daemonUrl, port = 6769, localServerId = null }) {
   const root = path.resolve(webRoot);
   const target = new URL(daemonUrl);
   if (!["http:", "https:"].includes(target.protocol)) throw new Error("Invalid daemon HTTP URL");
@@ -34,7 +34,8 @@ export function createUiHost({ webRoot, daemonUrl, port = 6769 }) {
   const indexResponse = async () => {
     const html = await Bun.file(path.join(root, "index.html")).text();
     const hint = { listen: `127.0.0.1:${server.port}`, useTls: false, label: "Paseo Bun" };
-    const script = `<script>window.__PASEO_INITIAL_DAEMON_CONNECTION__=${JSON.stringify(hint)}</script>`;
+    const identity = JSON.stringify(localServerId).replace(/</g, "\\u003c");
+    const script = `<script>window.__PASEO_INITIAL_DAEMON_CONNECTION__=${JSON.stringify(hint)};window.__PASEO_LOCAL_DAEMON_SERVER_ID__=${identity}</script>`;
     return new Response(html.replace(/<\/head>/i, `${script}</head>`), {
       headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache" },
     });

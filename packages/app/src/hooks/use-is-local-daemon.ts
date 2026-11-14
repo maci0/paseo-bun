@@ -1,6 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { getDesktopDaemonStatus, shouldUseDesktopDaemon } from "@/desktop/daemon/desktop-daemon";
 
+export function readLocalDaemonServerId(): string | null {
+  const value: unknown = Reflect.get(globalThis, "__PASEO_LOCAL_DAEMON_SERVER_ID__");
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
 const DESKTOP_DAEMON_SERVER_ID_QUERY_KEY = ["desktop-daemon-server-id"] as const;
 
 interface DesktopDaemonServerIdResult {
@@ -37,7 +42,7 @@ export function useLocalDaemonServerId(): string | null {
   const query = useLocalDaemonServerIdQuery();
 
   if (!isDesktopApp) {
-    return null;
+    return readLocalDaemonServerId();
   }
 
   return query.data?.serverId ?? null;
@@ -53,7 +58,7 @@ export function useLocalDaemonServerIdState(): LocalDaemonServerIdState {
   const query = useLocalDaemonServerIdQuery();
 
   if (!isDesktopApp) {
-    return { status: "resolved", serverId: null };
+    return { status: "resolved", serverId: readLocalDaemonServerId() };
   }
   if (query.isError) {
     return { status: "error" };

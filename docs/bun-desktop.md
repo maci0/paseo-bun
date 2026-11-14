@@ -11,7 +11,7 @@ Download matching `paseo-bun-desktop-*-linux-x64-aot.tar.gz` and `.sha256` asset
 from https://github.com/maci0/paseo-bun/releases, verify the checksum and extract:
 
 ```sh
-release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-1
+release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2
 archive=paseo-bun-desktop-0.16.0-beta.2-linux-x64-aot.tar.gz
 curl -fLO "$release_url/$archive"
 curl -fLO "$release_url/$archive.sha256"
