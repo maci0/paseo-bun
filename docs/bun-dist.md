@@ -1,7 +1,7 @@
 # paseo-bun native AOT distribution
 
-This Linux package contains the Paseo 0.16.0-beta.2 CLI, daemon and terminal/speech
-worker entry points compiled to native code with Bun. It needs no separate
+These native packages contain the Paseo 0.16.0-beta.2 CLI, daemon and terminal/speech
+worker entry points compiled to native code with Bun. They need no separate
 Node or Bun installation for those processes. Agent tools remain separate
 installations. Native dependencies and runtime assets must stay beside the
 executable; copy the entire directory.
