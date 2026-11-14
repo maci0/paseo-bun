@@ -41,7 +41,11 @@ writeFileSync(
   JSON.stringify({
     version: 1,
     daemon: { listen: address, relay: { enabled: false }, mcp: { enabled: false } },
-    features: { dictation: { enabled: false }, voiceMode: { enabled: false } },
+    features: {
+      webUi: { enabled: true },
+      dictation: { enabled: false },
+      voiceMode: { enabled: false },
+    },
   }),
 );
 const systemBin = path.join(temporary, "bin");
@@ -98,6 +102,14 @@ try {
   }
   assert.deepEqual(JSON.parse(cli(["--host", address, "ls", "--json"])), []);
   cli(["--host", address, "provider", "ls", "--json"]);
+  const webResponse = await fetch(`http://${address}/`);
+  assert.equal(webResponse.status, 200);
+  const html = await webResponse.text();
+  assert.match(html, /<html/i);
+  const script = html.match(/<script[^>]+src="([^"]+)"/);
+  assert.ok(script, "Web UI must reference a production JavaScript bundle");
+  assert.equal((await fetch(new URL(script[1], `http://${address}/`))).status, 200);
+
   const logLines = readFileSync(path.join(home, "daemon.log"), "utf8").split("\n");
   for (const plugin of builtinPlugins) {
     assert.ok(

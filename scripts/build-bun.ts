@@ -21,6 +21,7 @@ function run(command: string, args: string[]) {
 }
 
 run("npm", ["run", "build:server"]);
+run("npm", ["run", "build:web", "--workspace=@getpaseo/app"]);
 const files = execFileSync("node", ["scripts/trace-daemon.mjs"], {
   cwd: root,
   encoding: "utf8",
@@ -58,6 +59,11 @@ for (const file of files) {
   }
 }
 cpSync(path.join(root, "LICENSE"), path.join(output, "LICENSE"));
+cpSync(
+  path.join(root, "packages/app/dist"),
+  path.join(output, "packages/server/dist/server/web-ui"),
+  { recursive: true },
+);
 // The retained terminal worker is loaded by path, outside the module graph.
 cpSync(
   path.join(root, "packages/server/dist/server/terminal-worker"),
@@ -84,7 +90,8 @@ cpSync(
 // Preserve disk asset locations while compiling the application graph to native code.
 function rebaseModules(directory: string) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
-    if (entry.isSymbolicLink() || entry.name === "node_modules") continue;
+    if (entry.isSymbolicLink() || entry.name === "node_modules" || entry.name === "web-ui")
+      continue;
     const file = path.join(directory, entry.name);
     if (entry.isDirectory()) rebaseModules(file);
     else if (/\.[cm]?js$/.test(entry.name)) {
@@ -118,6 +125,7 @@ const info = {
   version,
   mode: "native-aot",
   trim: true,
+  webUi: true,
   aotInput: "upstream-emitted-javascript",
   platform: process.platform,
   arch: process.arch,

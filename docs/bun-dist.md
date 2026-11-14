@@ -76,4 +76,7 @@ for that graph, rather than compiling directly from TypeScript source.
 Bun AOT is experimental. Linux CLI/daemon, built-in plugin loading, PTY I/O and
 terminal retention are covered by the release smoke test. Voice inference,
 authenticated agent sessions, desktop/mobile and other operating systems are
-not validated. This archive does not include a desktop app or bundled web UI.
+not validated. This archive includes the production web UI. Enable it with
+`paseo-bun daemon config set features.webUi.enabled true --home "$HOME/.paseo-bun"`,
+then restart that daemon and open its HTTP address. A separate Electron desktop
+installer is not included.
