@@ -44,7 +44,7 @@ test.skipIf(process.platform !== "linux")(
       const config = JSON.parse(
         readFileSync("packages/desktop-bun/src-tauri/tauri.conf.json", "utf8"),
       );
-      expect(config.app.enableGtkAppId).toBe(true);
+      expect(config.app.enableGTKAppId).toBe(true);
       expect(config.identifier).toBe("sh.paseo.bun");
     } finally {
       rmSync(root, { recursive: true, force: true });
