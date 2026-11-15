@@ -4,7 +4,7 @@ Paseo **0.16.0-beta.2** with native Bun AOT CLI/daemon, an Elysia UI host,
 a Rust/Tauri v2 desktop window, and our large-history UI performance patch.
 Packaging follows [dsh-bun](https://github.com/evinelias/dsh-bun).
 
-[Current release](https://github.com/maci0/paseo-bun/releases/tag/bun-aot-v0.16.0-beta.2-2) ·
+[Current release](https://github.com/maci0/paseo-bun/releases/tag/bun-aot-v0.16.0-beta.2-3) ·
 [Desktop instructions](docs/bun-desktop.md) · [CLI instructions](docs/bun-dist.md) ·
 [Build from source](docs/bun.md)
 
@@ -19,7 +19,7 @@ Linux x64 only. Requires **glibc 2.39+, GTK 3 and WebKitGTK 4.1**
 No separate Node, Bun or Electron installation is needed.
 
 ```sh
-release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2
+release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3
 archive=paseo-bun-desktop-0.16.0-beta.2-linux-x64-aot.tar.gz
 curl -fLO "$release_url/$archive" &&
 curl -fLO "$release_url/$archive.sha256" &&
@@ -35,7 +35,7 @@ plus its matching checksum. Verify and extract, then open `paseo-bun/Paseo Bun.a
 For example, on Apple Silicon (use `darwin-x64` for Intel):
 
 ```sh
-release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2
+release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3
 archive=paseo-bun-desktop-0.16.0-beta.2-darwin-arm64-aot.tar.gz
 curl -fLO "$release_url/$archive" &&
 curl -fLO "$release_url/$archive.sha256" &&
@@ -67,14 +67,14 @@ persisted server ID; other connected hosts remain remote.
 
 ## Downloads
 
-All assets below are from **bun-aot-v0.16.0-beta.2-2**, a public beta release.
+All assets below are from **bun-aot-v0.16.0-beta.2-3**, a public beta release.
 
 | Platform            | Desktop                                                                                                                                          | Checksum                                                                                                                                                | CLI / web                                                                                                                                | Checksum                                                                                                                                        |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Linux x64           | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-desktop-0.16.0-beta.2-linux-x64-aot.tar.gz)    | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-desktop-0.16.0-beta.2-linux-x64-aot.tar.gz.sha256)    | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-0.16.0-beta.2-linux-x64-aot.tar.gz)    | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-0.16.0-beta.2-linux-x64-aot.tar.gz.sha256)    |
-| macOS Apple Silicon | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-desktop-0.16.0-beta.2-darwin-arm64-aot.tar.gz) | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-desktop-0.16.0-beta.2-darwin-arm64-aot.tar.gz.sha256) | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-0.16.0-beta.2-darwin-arm64-aot.tar.gz) | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-0.16.0-beta.2-darwin-arm64-aot.tar.gz.sha256) |
-| macOS Intel         | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-desktop-0.16.0-beta.2-darwin-x64-aot.tar.gz)   | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-desktop-0.16.0-beta.2-darwin-x64-aot.tar.gz.sha256)   | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-0.16.0-beta.2-darwin-x64-aot.tar.gz)   | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-0.16.0-beta.2-darwin-x64-aot.tar.gz.sha256)   |
-| Windows x64         | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-desktop-0.16.0-beta.2-win32-x64-aot.tar.gz)    | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-desktop-0.16.0-beta.2-win32-x64-aot.tar.gz.sha256)    | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-0.16.0-beta.2-win32-x64-aot.tar.gz)    | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-2/paseo-bun-0.16.0-beta.2-win32-x64-aot.tar.gz.sha256)    |
+| Linux x64           | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-desktop-0.16.0-beta.2-linux-x64-aot.tar.gz)    | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-desktop-0.16.0-beta.2-linux-x64-aot.tar.gz.sha256)    | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-0.16.0-beta.2-linux-x64-aot.tar.gz)    | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-0.16.0-beta.2-linux-x64-aot.tar.gz.sha256)    |
+| macOS Apple Silicon | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-desktop-0.16.0-beta.2-darwin-arm64-aot.tar.gz) | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-desktop-0.16.0-beta.2-darwin-arm64-aot.tar.gz.sha256) | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-0.16.0-beta.2-darwin-arm64-aot.tar.gz) | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-0.16.0-beta.2-darwin-arm64-aot.tar.gz.sha256) |
+| macOS Intel         | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-desktop-0.16.0-beta.2-darwin-x64-aot.tar.gz)   | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-desktop-0.16.0-beta.2-darwin-x64-aot.tar.gz.sha256)   | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-0.16.0-beta.2-darwin-x64-aot.tar.gz)   | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-0.16.0-beta.2-darwin-x64-aot.tar.gz.sha256)   |
+| Windows x64         | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-desktop-0.16.0-beta.2-win32-x64-aot.tar.gz)    | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-desktop-0.16.0-beta.2-win32-x64-aot.tar.gz.sha256)    | [Archive](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-0.16.0-beta.2-win32-x64-aot.tar.gz)    | [SHA-256](https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3/paseo-bun-0.16.0-beta.2-win32-x64-aot.tar.gz.sha256)    |
 
 Keep the **entire extracted directory** together: it includes native dependencies,
 plugins, notices and web assets. Both package types extract to `paseo-bun/`; unpack
