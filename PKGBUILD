@@ -18,7 +18,7 @@ sha256sums=('SKIP')
 prepare() {
   cd "$srcdir/paseo-bun-source"
   local _help
-  _help=$(bun compile --help 2>&1)
+  _help=$(bun compile --help 2>&1) || _help=''
   if [[ $_help != *'--aot-allow-code-from-disk'* ]]; then
     printf '%s\n' 'An AOT-capable Bun compiler must be first in PATH (see docs/bun.md).' >&2
     return 1
