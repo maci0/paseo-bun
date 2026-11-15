@@ -21,6 +21,11 @@ fn main() {
         println!("Paseo Bun Desktop {}", env!("CARGO_PKG_VERSION"));
         return;
     }
+    #[cfg(target_os = "linux")]
+    {
+        glib::set_prgname(Some("sh.paseo.bun"));
+        glib::set_application_name("Paseo Bun");
+    }
     let child: Arc<Mutex<Option<Child>>> = Arc::new(Mutex::new(None));
     let setup_child = child.clone();
     let exit_child = child.clone();
