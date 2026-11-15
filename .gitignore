@@ -105,3 +105,10 @@ app.json
 # Native Tauri desktop build output
 /packages/desktop-bun/src-tauri/target/
 /packages/desktop-bun/src-tauri/gen/
+
+# Arch package build output
+/src/
+/pkg/
+/paseo-bun-source/
+/*.pkg.tar.*
+/*.src.tar.*

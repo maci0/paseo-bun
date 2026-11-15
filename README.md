@@ -100,6 +100,12 @@ See the [desktop guide](docs/bun-desktop.md) for runtime behavior and the
 [CLI guide](docs/bun-dist.md) for headless installation, updates and uninstalling.
 Your existing Paseo configuration/history lives in `~/.paseo` by default.
 
+## Arch Linux / CachyOS
+
+Use the root [PKGBUILD](PKGBUILD) to build from source, or
+[packaging/arch/paseo-bun-bin/PKGBUILD](packaging/arch/paseo-bun-bin/PKGBUILD)
+to package the verified release binaries. [Installation instructions](docs/archlinux.md).
+
 ## AOT and performance
 
 Bun services use **native AOT with `--production --trim`**. The Rust shell uses
