@@ -2458,6 +2458,7 @@ dependencies = [
 name = "paseo-bun-desktop"
 version = "0.16.0-beta.2"
 dependencies = [
+ "glib",
  "libc",
  "serde_json",
  "tauri",
