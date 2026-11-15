@@ -14,7 +14,7 @@ on:
       release_tag:
         description: Existing release to upload validated assets to
         type: string
-        default: bun-aot-v0.16.0-beta.2-2
+        default: bun-aot-v0.16.0-beta.2-3
 
 permissions:
   contents: read
