@@ -29,6 +29,24 @@ const desktopVersion = execFileSync(
 );
 if (!desktopVersion.includes("0.16.0-beta.2")) throw new Error("Desktop version smoke test failed");
 cpSync(path.join(root, "docs/bun-desktop.md"), path.join(output, "README-desktop.md"));
+if (process.platform === "linux") {
+  const applications = path.join(output, "share/applications");
+  const icons = path.join(output, "share/icons/hicolor/256x256/apps");
+  mkdirSync(applications, { recursive: true });
+  mkdirSync(icons, { recursive: true });
+  cpSync(
+    path.join(root, "packages/desktop-bun/linux/sh.paseo.bun.desktop"),
+    path.join(applications, "sh.paseo.bun.desktop"),
+  );
+  cpSync(
+    path.join(root, "packages/desktop/assets/128x128@2x.png"),
+    path.join(icons, "sh.paseo.bun.png"),
+  );
+  cpSync(
+    path.join(root, "packages/desktop-bun/linux/install-desktop.sh"),
+    path.join(output, "install-desktop.sh"),
+  );
+}
 const info = JSON.parse(readFileSync(path.join(output, "build-info.json"), "utf8"));
 const archive = `paseo-bun-desktop-${info.version}-${process.platform}-${process.arch}-aot.tar.gz`;
 writeFileSync(

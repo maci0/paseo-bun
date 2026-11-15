@@ -10,7 +10,8 @@
     "windows": [],
     "security": {
       "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'"
-    }
+    },
+    "enableGtkAppId": true
   },
   "bundle": {
     "active": false,
