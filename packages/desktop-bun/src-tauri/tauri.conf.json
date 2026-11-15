@@ -11,7 +11,7 @@
     "security": {
       "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'"
     },
-    "enableGtkAppId": true
+    "enableGTKAppId": true
   },
   "bundle": {
     "active": false,
