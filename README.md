@@ -91,6 +91,7 @@ install_dir=$(mktemp -d "$HOME/.local/bin/paseo-bun-desktop.XXXXXX") &&
 cp -a paseo-bun/. "$install_dir/" &&
 ln -sfn "$install_dir/paseo-bun" "$HOME/.local/bin/paseo-bun" &&
 ln -sfn "$install_dir/paseo-bun-desktop" "$HOME/.local/bin/paseo-bun-desktop"
+"$install_dir/install-desktop.sh"
 export PATH="$HOME/.local/bin:$PATH"
 paseo-bun-desktop
 ```

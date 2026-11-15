@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Paseo Bun
+Comment=Paseo with native Bun AOT, Elysia and Tauri
+Exec=paseo-bun-desktop
+Icon=sh.paseo.bun
+Terminal=false
+Categories=Development;
+StartupWMClass=sh.paseo.bun
+StartupNotify=true

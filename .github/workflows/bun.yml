@@ -64,7 +64,7 @@ jobs:
       - run: bun run build:desktop:bun
       - run: bun test packages/desktop-bun/src/ui-host.test.ts
       - run: npx vitest run --config packages/server/vitest.config.ts packages/server/src/server/paseo-env.test.ts
-      - run: bun test scripts/aot-module-path.test.ts scripts/trace-path.test.ts
+      - run: bun test scripts/aot-module-path.test.ts scripts/trace-path.test.ts scripts/linux-desktop.test.ts
       - if: runner.os != 'Windows'
         run: bun run test:bun
       - if: runner.os == 'Windows'
