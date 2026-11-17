@@ -8,7 +8,7 @@ const cleanup: Array<() => void> = [];
 afterEach(() => {
   while (cleanup.length) cleanup.pop()!();
 });
-function fixture(localServerId: string | null = null) {
+function fixture(localServerId: string | null = null, updater = null) {
   const root = mkdtempSync(path.join(tmpdir(), "paseo-elysia-test-"));
   writeFileSync(
     path.join(root, "index.html"),
@@ -38,6 +38,7 @@ function fixture(localServerId: string | null = null) {
     daemonUrl: `http://127.0.0.1:${backend.port}`,
     port: 0,
     localServerId,
+    updater,
   });
   cleanup.push(() => host.stop());
   return host;
@@ -48,6 +49,7 @@ describe("Elysia desktop UI host", () => {
     const html = await (await fetch(host.url + "/workspaces/one")).text();
     expect(html).toContain("<html>");
     expect(html).toContain(`"listen":"127.0.0.1:${host.server.port}"`);
+    expect(html).toContain("window.__PASEO_BUN_DESKTOP__=true");
     expect(await (await fetch(host.url + "/app.js")).text()).toContain("paseo");
     expect((await fetch(host.url + "/missing.js")).status).toBe(404);
     expect(
@@ -66,6 +68,34 @@ describe("Elysia desktop UI host", () => {
     expect(await (await fetch(remote.url)).text()).toContain(
       "window.__PASEO_LOCAL_DAEMON_SERVER_ID__=null",
     );
+  });
+  test("checks and applies an update only through the injected updater", async () => {
+    const calls: string[] = [];
+    const host = fixture(null, {
+      async check() {
+        calls.push("check");
+        return { currentVersion: "0.16.1", update: { version: "0.16.2" } };
+      },
+      async stage() {
+        calls.push("stage");
+      },
+      async install() {
+        calls.push("install");
+        return { installed: true, version: "0.16.2" };
+      },
+    });
+    expect(await (await fetch(host.url + "/__paseo_ui/update")).json()).toEqual({
+      available: true,
+      currentVersion: "0.16.1",
+      version: "0.16.2",
+    });
+    expect(await (await fetch(host.url + "/__paseo_ui/update", { method: "POST" })).json()).toEqual({
+      installed: true,
+      version: "0.16.2",
+    });
+    expect(calls).toEqual(["check", "check", "stage", "install"]);
+    const plain = fixture();
+    expect((await fetch(plain.url + "/__paseo_ui/update", { method: "POST" })).status).toBe(404);
   });
   test("rejects foreign origins, rebound hosts and traversal", async () => {
     const host = fixture();

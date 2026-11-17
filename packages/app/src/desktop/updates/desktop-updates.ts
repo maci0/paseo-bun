@@ -72,8 +72,13 @@ function toNumberOr(defaultValue: number, value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? value : defaultValue;
 }
 
+function isPaseoBunDesktop(): boolean {
+  if (!isWeb || typeof window === "undefined") return false;
+  return Reflect.get(window, "__PASEO_BUN_DESKTOP__") === true;
+}
+
 export function shouldShowDesktopUpdateSection(): boolean {
-  return isWeb && isElectronRuntime();
+  return isWeb && (isElectronRuntime() || isPaseoBunDesktop());
 }
 
 export function parseLocalDaemonVersionResult(raw: unknown): LocalDaemonVersionResult {
@@ -111,6 +116,23 @@ export async function getDesktopRuntimeInfo(): Promise<DesktopRuntimeInfo> {
   return parseDesktopRuntimeInfo(result);
 }
 
+async function readBunUpdate(): Promise<DesktopAppUpdateCheckResult> {
+  const response = await fetch("/__paseo_ui/update");
+  const body: unknown = await response.json();
+  if (!response.ok || !isRecord(body)) {
+    throw new Error(isRecord(body) ? (toStringOrNull(body.error) ?? "Update check failed") : "Update check failed");
+  }
+  return {
+    hasUpdate: body.available === true,
+    readyToInstall: body.available === true,
+    currentVersion: toStringOrNull(body.currentVersion),
+    latestVersion: toStringOrNull(body.version),
+    body: null,
+    date: null,
+    errorMessage: null,
+  };
+}
+
 export async function checkDesktopAppUpdate({
   releaseChannel,
   intent,
@@ -118,6 +140,7 @@ export async function checkDesktopAppUpdate({
   releaseChannel: DesktopReleaseChannel;
   intent: DesktopAppUpdateCheckIntent;
 }): Promise<DesktopAppUpdateCheckResult> {
+  if (isPaseoBunDesktop()) return readBunUpdate();
   const result = await invokeDesktopCommand<unknown>("check_app_update", {
     releaseChannel,
     intent,
@@ -176,6 +199,20 @@ export async function installDesktopAppUpdate({
 }: {
   releaseChannel: DesktopReleaseChannel;
 }): Promise<DesktopAppUpdateInstallResult> {
+  if (isPaseoBunDesktop()) {
+    const response = await fetch("/__paseo_ui/update", { method: "POST" });
+    const body: unknown = await response.json();
+    if (!response.ok || !isRecord(body) || body.installed !== true) {
+      throw new Error(
+        isRecord(body) ? (toStringOrNull(body.error) ?? "Update failed") : "Update failed",
+      );
+    }
+    return {
+      installed: true,
+      version: toStringOrNull(body.version),
+      message: i18n.t("desktop.updates.status.installed"),
+    };
+  }
   const result = await invokeDesktopCommand<unknown>("install_app_update", { releaseChannel });
   if (!isRecord(result)) {
     throw new Error("Unexpected response while installing desktop update.");

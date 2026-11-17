@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { startDaemonInstance, resolvePaseoHome } from "@getpaseo/server/daemon-control";
 import { createUiHost } from "./ui-host.js";
+import { createUpdater } from "./updater.js";
 
 const { values } = parseArgs({
   args: process.argv.slice(2),
@@ -39,7 +40,21 @@ if (!daemonUrl) {
 }
 const webRoot =
   values["web-root"] ?? fileURLToPath(new URL("../../server/dist/server/web-ui/", import.meta.url));
-const host = createUiHost({ webRoot, daemonUrl, port, localServerId });
+const versionFile = Bun.file(path.join(root, "build-info.json"));
+const currentVersion = versionFile.size ? (await versionFile.json()).version : null;
+let host;
+const updater =
+  globalThis.paseoAot && currentVersion
+    ? createUpdater({
+        currentVersion,
+        installDirectory: root,
+        quit() {
+          host.stop();
+          setTimeout(() => process.exit(0), 250);
+        },
+      })
+    : null;
+host = createUiHost({ webRoot, daemonUrl, port, localServerId, updater });
 process.stdout.write(JSON.stringify({ type: "paseo-ui-ready", url: host.url }) + "\n");
 for (const signal of ["SIGINT", "SIGTERM"])
   process.once(signal, () => {
