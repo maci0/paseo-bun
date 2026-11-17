@@ -29,12 +29,11 @@ and Windows desktop workflows require manual validation on those systems.
 ## Download and run — Linux
 
 Download matching `paseo-bun-desktop-*-linux-x64-aot.tar.gz` and `.sha256` assets
-from https://github.com/maci0/paseo-bun/releases, verify the checksum and extract.
-The commands below use bun-aot-v0.16.0-beta.2-3, the latest published archive:
+from https://github.com/maci0/paseo-bun/releases, verify the checksum and extract:
 
 ```sh
-release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3
-archive=paseo-bun-desktop-0.16.0-beta.2-linux-x64-aot.tar.gz
+release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0
+archive=paseo-bun-desktop-0.16.0-linux-x64-aot.tar.gz
 curl -fLO "$release_url/$archive"
 curl -fLO "$release_url/$archive.sha256"
 sha256sum -c "$archive.sha256"
@@ -104,6 +103,15 @@ Paseo protocol. Electron-specific integrations, including its embedded Chromium
 browser automation, Electron updater and desktop IPC, are not implemented by
 this first Tauri target. Dynamic plugins and external scripts remain interpreted
 by Bun. The Rust shell and the Bun application graph are native AOT.
+
+The Browser tab is a sandboxed iframe that loads loopback URLs only (`localhost`,
+`*.localhost`, `127.0.0.0/8`, `[::1]`), for previewing local dev servers. Other
+URLs, including links followed inside the frame, open in your normal browser.
+It has no back/forward, element annotation, dev tools or agent browser
+automation, and pages that send `X-Frame-Options` or a `frame-ancestors` CSP
+refuse to load. WebKit runs the shell's navigation handler for iframes too, so
+`packages/desktop-bun/src-tauri/src/main.rs` allows loopback navigations; the
+iframe sandbox blocks top-level navigation from the framed page.
 
 ## Included UI performance patch
 

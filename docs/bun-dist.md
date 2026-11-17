@@ -9,12 +9,11 @@ executable; copy the entire directory.
 ## Download and verify
 
 For Linux x64, download the archive and checksum from the current release.
-The commands below use bun-aot-v0.16.0-beta.2-3, the latest published archive.
 Run these commands in the directory where you want to unpack the package:
 
 ```sh
-release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0-beta.2-3
-archive=paseo-bun-0.16.0-beta.2-linux-x64-aot.tar.gz
+release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.0
+archive=paseo-bun-0.16.0-linux-x64-aot.tar.gz
 curl -fLO "$release_url/$archive" &&
 curl -fLO "$release_url/$archive.sha256" &&
 sha256sum -c "$archive.sha256" &&
@@ -33,7 +32,7 @@ From the directory containing the extracted `paseo-bun/` folder:
 
 ```sh
 mkdir -p "$HOME/.local/bin"
-install_dir=$(mktemp -d "$HOME/.local/bin/paseo-bun-0.16.0-beta.2-aot.XXXXXX")
+install_dir=$(mktemp -d "$HOME/.local/bin/paseo-bun-0.16.0-aot.XXXXXX")
 cp -a paseo-bun/. "$install_dir/"
 ln -sfn "$install_dir/paseo-bun" "$HOME/.local/bin/paseo-bun"
 export PATH="$HOME/.local/bin:$PATH"
