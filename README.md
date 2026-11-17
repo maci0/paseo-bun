@@ -1,6 +1,6 @@
 # Paseo Bun + Elysia + Tauri v2
 
-Paseo **0.16.0-beta.2** with native Bun AOT CLI/daemon, an Elysia UI host,
+Paseo **0.16.0** with native Bun AOT CLI/daemon, an Elysia UI host,
 a Rust/Tauri v2 desktop window, and our large-history UI performance patch.
 Packaging follows [dsh-bun](https://github.com/evinelias/dsh-bun).
 
@@ -67,7 +67,7 @@ persisted server ID; other connected hosts remain remote.
 
 ## Downloads
 
-All assets below are from **bun-aot-v0.16.0-beta.2-3**, a public beta release.
+Source is upstream Paseo 0.16.0. The binaries below are still **bun-aot-v0.16.0-beta.2-3** until the next archive is published.
 
 | Platform            | Desktop                                                                                                                                          | Checksum                                                                                                                                                | CLI / web                                                                                                                                | Checksum                                                                                                                                        |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
