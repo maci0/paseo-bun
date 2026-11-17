@@ -2456,7 +2456,7 @@ dependencies = [
 
 [[package]]
 name = "paseo-bun-desktop"
-version = "0.16.0"
+version = "0.16.1"
 dependencies = [
  "glib",
  "libc",
