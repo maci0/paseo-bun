@@ -1,13 +1,13 @@
 {
   "name": "@getpaseo/desktop-bun",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "private": true,
   "type": "module",
   "description": "Paseo Bun AOT + Elysia + Tauri v2 desktop",
   "dependencies": {
     "elysia": "1.4.32",
-    "@getpaseo/server": "0.16.0",
-    "@getpaseo/protocol": "0.16.0",
+    "@getpaseo/server": "0.16.1",
+    "@getpaseo/protocol": "0.16.1",
     "ws": "^8.20.0"
   }
 }
