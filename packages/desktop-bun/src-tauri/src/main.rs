@@ -16,6 +16,55 @@ fn stop_host(child: &Arc<Mutex<Option<Child>>>) {
     }
 }
 
+/// WebKit runs the navigation handler for iframes too, so loopback pages must
+/// pass for the browser pane to frame them. The pane's sandbox forbids top
+/// navigation, and the app never navigates its own window to another origin.
+fn is_loopback_http(url: &tauri::Url) -> bool {
+    if !matches!(url.scheme(), "http" | "https") {
+        return false;
+    }
+    let Some(host) = url.host_str() else {
+        return false;
+    };
+    let host = host.trim_start_matches('[').trim_end_matches(']');
+    match host.parse::<std::net::IpAddr>() {
+        Ok(ip) => ip.is_loopback(),
+        Err(_) => host == "localhost" || host.ends_with(".localhost"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_loopback_http;
+
+    fn check(url: &str) -> bool {
+        is_loopback_http(&url.parse().expect("valid url"))
+    }
+
+    #[test]
+    fn loopback_only() {
+        for url in [
+            "http://localhost:5173/",
+            "https://LOCALHOST/",
+            "http://app.localhost:3000/",
+            "http://127.0.0.1:8080/",
+            "http://127.9.9.9/",
+            "http://[::1]:3000/",
+        ] {
+            assert!(check(url), "{url}");
+        }
+        for url in [
+            "https://example.com/",
+            "http://localhost.example.com/",
+            "http://192.168.1.10:3000/",
+            "file:///etc/passwd",
+            "ws://localhost:3000/",
+        ] {
+            assert!(!check(url), "{url}");
+        }
+    }
+}
+
 fn main() {
     if std::env::args().any(|arg| arg == "--version") {
         println!("Paseo Bun Desktop {}", env!("CARGO_PKG_VERSION"));
@@ -101,7 +150,7 @@ fn main() {
                 .inner_size(1280.0, 860.0)
                 .min_inner_size(900.0, 600.0)
                 .on_navigation(move |target| {
-                    if target.origin() == allowed_origin {
+                    if target.origin() == allowed_origin || is_loopback_http(target) {
                         return true;
                     }
                     if matches!(target.scheme(), "https" | "http") {
@@ -117,6 +166,9 @@ fn main() {
         Ok(app) => app.run(move |_, event| {
             if matches!(event, RunEvent::Exit) {
                 stop_host(&exit_child);
+                // A downloaded update waits until this process is gone, then
+                // replaces the directory that contains this executable.
+                std::thread::sleep(Duration::from_millis(300));
             }
         }),
         Err(error) => {

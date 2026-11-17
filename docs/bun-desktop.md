@@ -100,8 +100,16 @@ checksum. `build-info.json` and `desktop-info.json` record their provenance.
 
 The web UI's agents, projects, editor, diffs and terminals use the existing
 Paseo protocol. Electron-specific integrations, including its embedded Chromium
-browser automation, Electron updater and desktop IPC, are not implemented by
-this first Tauri target. Dynamic plugins and external scripts remain interpreted
+browser automation and desktop IPC, are not implemented by this Tauri target.
+Check for updates in Settings reads `build-info.json` in the install directory
+and downloads the newest full `bun-aot-v*` desktop archive for this OS from
+`maci0/paseo-bun`. It verifies the published SHA-256 and replaces that directory
+after the window closes. A prerelease is ignored, so a release has to be
+published without the pre-release flag before clients will install it. The
+running executable cannot
+overwrite itself, so the swap runs from a detached script. Relaunch from the
+same path. The button is absent when you run the app from a source checkout.
+Dynamic plugins and external scripts remain interpreted
 by Bun. The Rust shell and the Bun application graph are native AOT.
 
 The Browser tab is a sandboxed iframe that loads loopback URLs only (`localhost`,

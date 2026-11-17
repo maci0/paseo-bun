@@ -2,8 +2,15 @@ import { Elysia } from "elysia";
 import WebSocket from "ws";
 import path from "node:path";
 import { MAX_WEBSOCKET_MESSAGE_BYTES } from "@getpaseo/protocol/websocket-message-limit";
+import { createUpdater } from "./updater.js";
 
-export function createUiHost({ webRoot, daemonUrl, port = 6769, localServerId = null }) {
+export function createUiHost({
+  webRoot,
+  daemonUrl,
+  port = 6769,
+  localServerId = null,
+  updater = null,
+}) {
   const root = path.resolve(webRoot);
   const target = new URL(daemonUrl);
   if (!["http:", "https:"].includes(target.protocol)) throw new Error("Invalid daemon HTTP URL");
@@ -35,13 +42,42 @@ export function createUiHost({ webRoot, daemonUrl, port = 6769, localServerId = 
     const html = await Bun.file(path.join(root, "index.html")).text();
     const hint = { listen: `127.0.0.1:${server.port}`, useTls: false, label: "Paseo Bun" };
     const identity = JSON.stringify(localServerId).replace(/</g, "\\u003c");
-    const script = `<script>window.__PASEO_INITIAL_DAEMON_CONNECTION__=${JSON.stringify(hint)};window.__PASEO_LOCAL_DAEMON_SERVER_ID__=${identity}</script>`;
+    const script = `<script>window.__PASEO_INITIAL_DAEMON_CONNECTION__=${JSON.stringify(hint)};window.__PASEO_LOCAL_DAEMON_SERVER_ID__=${identity};window.__PASEO_BUN_DESKTOP__=true</script>`;
     return new Response(html.replace(/<\/head>/i, `${script}</head>`), {
       headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache" },
     });
   };
   const app = new Elysia()
     .get("/__paseo_ui/health", () => ({ ok: true, framework: "elysia", daemon: target.origin }))
+    .get("/__paseo_ui/update", async ({ set }) => {
+      if (!updater) return { available: false, currentVersion: null, version: null };
+      try {
+        const { currentVersion, update } = await updater.check();
+        return {
+          available: Boolean(update),
+          currentVersion,
+          version: update?.version ?? null,
+        };
+      } catch (error) {
+        set.status = 502;
+        return { error: error instanceof Error ? error.message : "Update check failed" };
+      }
+    })
+    .post("/__paseo_ui/update", async ({ set }) => {
+      if (!updater) {
+        set.status = 404;
+        return { error: "Updates are unavailable" };
+      }
+      try {
+        const { update } = await updater.check();
+        if (!update) return { installed: false, version: null };
+        await updater.stage(update);
+        return await updater.install();
+      } catch (error) {
+        set.status = 502;
+        return { error: error instanceof Error ? error.message : "Update failed" };
+      }
+    })
     .all("/.well-known/*", ({ request }) => proxy(request), { parse: "none" })
     .all("/api/*", ({ request }) => proxy(request), { parse: "none" })
     .get("*", async ({ request }) => {
