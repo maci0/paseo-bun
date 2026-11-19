@@ -2,7 +2,7 @@
 
 This desktop distribution combines the native Bun AOT daemon and CLI, an
 Elysia HTTP host, and a Rust/Tauri v2 desktop window. It uses the production
-Paseo 0.16.1 React UI, including our indexed history-hydration performance
+Paseo 0.16.2 React UI, including our indexed history-hydration performance
 patch. The architecture follows [dsh-bun](https://github.com/evinelias/dsh-bun).
 
 ## macOS and Windows
@@ -32,8 +32,8 @@ Download matching `paseo-bun-desktop-*-linux-x64-aot.tar.gz` and `.sha256` asset
 from https://github.com/maci0/paseo-bun/releases, verify the checksum and extract:
 
 ```sh
-release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.1
-archive=paseo-bun-desktop-0.16.1-linux-x64-aot.tar.gz
+release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.16.2
+archive=paseo-bun-desktop-0.16.2-linux-x64-aot.tar.gz
 curl -fLO "$release_url/$archive"
 curl -fLO "$release_url/$archive.sha256"
 sha256sum -c "$archive.sha256"
