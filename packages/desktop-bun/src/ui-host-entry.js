@@ -48,6 +48,7 @@ const updater =
     ? createUpdater({
         currentVersion,
         installDirectory: root,
+        appImagePath: process.env.PASEO_APPIMAGE_PATH,
         quit() {
           host.stop();
           setTimeout(() => process.exit(0), 250);

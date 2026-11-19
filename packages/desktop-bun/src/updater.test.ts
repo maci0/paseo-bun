@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
@@ -7,6 +7,7 @@ import { afterEach, expect, test } from "bun:test";
 import {
   compareVersions,
   createApplyScript,
+  createUpdater,
   downloadVerifiedArchive,
   selectRelease,
 } from "./updater.js";
@@ -59,14 +60,59 @@ test("rejects an archive whose bytes do not match the published checksum", async
   ]);
   const fetchImpl = (url: string) =>
     Promise.resolve(files.get(url)?.() ?? new Response("", { status: 404 }));
-  const update = { name, archiveUrl: "https://example.test/archive", checksumUrl: "https://example.test/checksum" };
-  expect(await downloadVerifiedArchive(update, { fetchImpl, directory })).toBe(path.join(directory, name));
+  const update = {
+    name,
+    archiveUrl: "https://example.test/archive",
+    checksumUrl: "https://example.test/checksum",
+  };
+  expect(await downloadVerifiedArchive(update, { fetchImpl, directory })).toBe(
+    path.join(directory, name),
+  );
   await expect(
     downloadVerifiedArchive(
       { ...update, checksumUrl: "https://example.test/wrong" },
       { fetchImpl, directory },
     ),
   ).rejects.toThrow("checksum");
+});
+
+test("installs only a verified AppImage at the original executable path", async () => {
+  const appImagePath = path.join(temp(), "My Paseo.AppImage");
+  writeFileSync(appImagePath, "old");
+  const name = "Paseo-Bun-0.16.2-x86_64.AppImage";
+  const url = `https://example.test/${name}`;
+  const next = "new AppImage";
+  const digest = createHash("sha256").update(next).digest("hex");
+  let checksum = "0".repeat(64);
+  const updater = createUpdater({
+    currentVersion: "0.16.1",
+    appImagePath,
+    fetchImpl: async (request: string) => {
+      if (request === url) return new Response(next);
+      if (request === `${url}.sha256`) return new Response(checksum);
+      return Response.json([
+        { tag_name: "bun-aot-v0.16.3", assets: asset("0.16.3") },
+        {
+          tag_name: "bun-aot-v0.16.2",
+          assets: [name, `${name}.sha256`].map((file) => ({
+            name: file,
+            browser_download_url: `https://example.test/${file}`,
+          })),
+        },
+      ]);
+    },
+  });
+  const { update } = await updater.check();
+  expect(update?.name).toBe(name);
+  if (!update) throw new Error("Expected AppImage update");
+  await expect(updater.stage(update)).rejects.toThrow("checksum");
+  expect(readFileSync(appImagePath, "utf8")).toBe("old");
+  checksum = digest;
+  await updater.stage(update);
+  expect(readFileSync(appImagePath, "utf8")).toBe("old");
+  expect(await updater.install()).toEqual({ installed: true, version: "0.16.2" });
+  expect(readFileSync(appImagePath, "utf8")).toBe(next);
+  expect(statSync(appImagePath).mode & 0o777).toBe(0o755);
 });
 
 test("the apply script replaces the install directory after its parent exits", () => {
