@@ -88,7 +88,10 @@ export function createApplyScript({ installDirectory, archivePath }) {
   const script = `#!/bin/sh
 set -eu
 parent=$1
-while kill -0 "$parent" 2>/dev/null; do sleep 0.2; done
+while kill -0 "$parent" 2>/dev/null; do
+  case "$(ps -o stat= -p "$parent")" in *Z*) break ;; esac
+  sleep 0.2
+done
 workdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 tar -xzf ${shellQuote(archivePath)} -C "$workdir"
 test -d "$workdir/paseo-bun"
@@ -110,7 +113,7 @@ rmdir "$(dirname ${shellQuote(archivePath)})" 2>/dev/null || true
   return scriptPath;
 }
 
-export function spawnApply(scriptPath, parentPid = process.pid) {
+export function spawnApply(scriptPath, parentPid) {
   const child = spawn("/bin/sh", [scriptPath, String(parentPid)], {
     detached: true,
     stdio: "ignore",
@@ -125,7 +128,7 @@ export function createUpdater({
   installDirectory,
   appImagePath,
   fetchImpl = fetch,
-  quit = () => {},
+  desktopPid,
 }) {
   let pending = null;
   return {
@@ -176,8 +179,7 @@ export function createUpdater({
         installDirectory,
         archivePath: pending.archivePath,
       });
-      spawnApply(scriptPath);
-      quit();
+      spawnApply(scriptPath, desktopPid);
       return { installed: true, version: pending.update.version };
     },
   };

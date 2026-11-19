@@ -145,6 +145,7 @@ fn main() {
             }
             let allowed_origin = url.origin();
             let opener = app.handle().clone();
+            let popup_opener = opener.clone();
             WebviewWindowBuilder::new(app, "main", WebviewUrl::External(url))
                 .title("Paseo Bun — AOT + Elysia + Tauri v2")
                 .inner_size(1280.0, 860.0)
@@ -157,6 +158,17 @@ fn main() {
                         let _ = opener.opener().open_url(target.as_str(), None::<String>);
                     }
                     false
+                })
+                .on_new_window(move |target, _| {
+                    if matches!(target.scheme(), "https" | "http") {
+                        if let Err(error) = popup_opener
+                            .opener()
+                            .open_url(target.as_str(), None::<String>)
+                        {
+                            eprintln!("Could not open external link: {error}");
+                        }
+                    }
+                    tauri::webview::NewWindowResponse::Deny
                 })
                 .build()?;
             Ok(())
