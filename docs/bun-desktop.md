@@ -120,10 +120,10 @@ For tarball installs, Check for updates in Settings reads `build-info.json` in t
 and downloads the newest full `bun-aot-v*` desktop archive for this OS from
 `maci0/paseo-bun`. It verifies the published SHA-256 and replaces that directory
 after the window closes. A prerelease is ignored, so a release has to be
-published without the pre-release flag before clients will install it. The
-running executable cannot
-overwrite itself, so the swap runs from a detached script. Relaunch from the
-same path. The button is absent when you run the app from a source checkout.
+published without the pre-release flag before clients will install it. After
+Settings confirms the update, close the desktop window to let the installer
+swap the bundle, then relaunch from the same path. The button is absent when
+you run the app from a source checkout.
 Dynamic plugins and external scripts remain interpreted
 by Bun. The Rust shell and the Bun application graph are native AOT.
 

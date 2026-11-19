@@ -42,20 +42,17 @@ const webRoot =
   values["web-root"] ?? fileURLToPath(new URL("../../server/dist/server/web-ui/", import.meta.url));
 const versionFile = Bun.file(path.join(root, "build-info.json"));
 const currentVersion = versionFile.size ? (await versionFile.json()).version : null;
-let host;
 const updater =
   globalThis.paseoAot && currentVersion
     ? createUpdater({
         currentVersion,
         installDirectory: root,
         appImagePath: process.env.PASEO_APPIMAGE_PATH,
-        quit() {
-          host.stop();
-          setTimeout(() => process.exit(0), 250);
-        },
+        // Keep serving the install response until the desktop window closes.
+        desktopPid: process.ppid,
       })
     : null;
-host = createUiHost({ webRoot, daemonUrl, port, localServerId, updater });
+const host = createUiHost({ webRoot, daemonUrl, port, localServerId, updater });
 process.stdout.write(JSON.stringify({ type: "paseo-ui-ready", url: host.url }) + "\n");
 for (const signal of ["SIGINT", "SIGTERM"])
   process.once(signal, () => {
