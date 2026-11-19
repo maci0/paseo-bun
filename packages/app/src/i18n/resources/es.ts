@@ -619,6 +619,8 @@ export const es: TranslationResources = {
         subtitle: "Abra este espacio de trabajo en Electron para usar el navegador integrado.",
       },
       session: "Sesión de navegador{{browserId}}",
+      localOnly:
+        "Introduce una URL de localhost para previsualizarla aquí. Los demás sitios se abren en tu navegador.",
       controls: {
         back: "Atrás",
         forward: "Adelante",

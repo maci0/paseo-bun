@@ -619,6 +619,8 @@ export const fr: TranslationResources = {
         subtitle: "Ouvrez cet espace de travail dans Electron pour utiliser le navigateur intégré.",
       },
       session: "Session de navigateur {{browserId}}",
+      localOnly:
+        "Saisissez une URL localhost pour l’afficher ici. Les autres sites s’ouvrent dans votre navigateur.",
       controls: {
         back: "Retour",
         forward: "Suivant",

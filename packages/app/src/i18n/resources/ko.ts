@@ -614,6 +614,8 @@ export const ko: TranslationResources = {
         subtitle: "내장 브라우저를 사용하려면 이 워크스페이스를 Electron에서 여세요.",
       },
       session: "브라우저 세션 {{browserId}}",
+      localOnly:
+        "localhost URL을 입력하면 여기에서 미리 볼 수 있습니다. 다른 사이트는 브라우저에서 열립니다.",
       controls: {
         back: "뒤로",
         forward: "앞으로",
