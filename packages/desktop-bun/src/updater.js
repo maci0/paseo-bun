@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
-import { chmodSync, mkdtempSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdtempSync, realpathSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -29,7 +29,7 @@ export function desktopAssetName(version, platform, arch) {
 
 // A release counts only when it is a full release with both the archive and
 // its checksum. Prereleases stay off this path so a beta cannot replace stable.
-export function selectRelease(releases, { currentVersion, platform, arch }) {
+export function selectRelease(releases, { currentVersion, platform, arch, appImagePath }) {
   const candidates = [];
   for (const release of releases) {
     if (release.draft || release.prerelease || !String(release.tag_name).startsWith(TAG_PREFIX)) {
@@ -37,7 +37,9 @@ export function selectRelease(releases, { currentVersion, platform, arch }) {
     }
     const version = release.tag_name.slice(TAG_PREFIX.length);
     if (compareVersions(version, currentVersion) <= 0) continue;
-    const name = desktopAssetName(version, platform, arch);
+    const name = appImagePath
+      ? `Paseo-Bun-${version}-x86_64.AppImage`
+      : desktopAssetName(version, platform, arch);
     const archive = (release.assets ?? []).find((asset) => asset.name === name);
     const checksum = (release.assets ?? []).find((asset) => asset.name === `${name}.sha256`);
     if (!archive?.browser_download_url || !checksum?.browser_download_url) continue;
@@ -121,6 +123,7 @@ export function createUpdater({
   platform = process.platform,
   arch = process.arch,
   installDirectory,
+  appImagePath,
   fetchImpl = fetch,
   quit = () => {},
 }) {
@@ -131,17 +134,44 @@ export function createUpdater({
         headers: { accept: "application/vnd.github+json", "user-agent": "paseo-bun" },
       });
       if (!response.ok) throw new Error("Could not read Paseo Bun releases");
-      const update = selectRelease(await response.json(), { currentVersion, platform, arch });
+      const update = selectRelease(await response.json(), {
+        currentVersion,
+        platform,
+        arch,
+        appImagePath,
+      });
       return { currentVersion, update };
     },
     async stage(update) {
-      const directory = mkdtempSync(path.join(tmpdir(), "paseo-bun-download-"));
-      const archivePath = await downloadVerifiedArchive(update, { fetchImpl, directory });
-      pending = { update, archivePath };
+      const target = appImagePath ? realpathSync(appImagePath) : null;
+      const directory = mkdtempSync(
+        target
+          ? path.join(path.dirname(target), ".paseo-bun-update-")
+          : path.join(tmpdir(), "paseo-bun-download-"),
+      );
+      try {
+        const archivePath = await downloadVerifiedArchive(update, { fetchImpl, directory });
+        pending = { update, archivePath, target };
+      } catch (error) {
+        rmSync(directory, { recursive: true, force: true });
+        throw error;
+      }
       return { version: update.version };
     },
     async install() {
       if (!pending) throw new Error("No update has been downloaded");
+      if (pending.target) {
+        const { archivePath, target, update } = pending;
+        pending = null;
+        try {
+          chmodSync(archivePath, 0o755);
+          // The running mount keeps the original inode. Rename on the same filesystem.
+          renameSync(archivePath, target);
+        } finally {
+          rmSync(path.dirname(archivePath), { recursive: true, force: true });
+        }
+        return { installed: true, version: update.version };
+      }
       const scriptPath = createApplyScript({
         installDirectory,
         archivePath: pending.archivePath,

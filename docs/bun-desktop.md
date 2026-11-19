@@ -28,6 +28,21 @@ and Windows desktop workflows require manual validation on those systems.
 
 ## Download and run — Linux
 
+For a single-file desktop launcher, download the x86_64 `Paseo-Bun-*.AppImage`
+and its matching checksum from the release. Verify it with `sha256sum -c`, make
+it executable with `chmod +x`, and run it. The AppImage uses the same GTK 3,
+WebKitGTK 4.1, and glibc baseline as the tarball. If FUSE is unavailable, run it
+with `--appimage-extract-and-run`.
+
+The launcher keeps a versioned runtime under
+`${XDG_DATA_HOME:-~/.local/share}/paseo-bun/appimage` so the daemon can keep
+running after the window closes. Use Check for updates in Settings, then
+install the offered update. Paseo verifies the new AppImage's checksum and
+atomically replaces the original file. Close and reopen it to load the new
+version. Keep
+the old runtime directory while its daemon is still running. Use the tarball
+or Arch package for a standalone CLI or a systemd-managed daemon.
+
 Download matching `paseo-bun-desktop-*-linux-x64-aot.tar.gz` and `.sha256` assets
 from https://github.com/maci0/paseo-bun/releases, verify the checksum and extract:
 
@@ -101,7 +116,7 @@ checksum. `build-info.json` and `desktop-info.json` record their provenance.
 The web UI's agents, projects, editor, diffs and terminals use the existing
 Paseo protocol. Electron-specific integrations, including its embedded Chromium
 browser automation and desktop IPC, are not implemented by this Tauri target.
-Check for updates in Settings reads `build-info.json` in the install directory
+For tarball installs, Check for updates in Settings reads `build-info.json` in the install directory
 and downloads the newest full `bun-aot-v*` desktop archive for this OS from
 `maci0/paseo-bun`. It verifies the published SHA-256 and replaces that directory
 after the window closes. A prerelease is ignored, so a release has to be

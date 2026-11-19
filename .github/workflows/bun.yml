@@ -62,7 +62,22 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run postinstall
       - run: bun run build:desktop:bun
-      - run: bun test packages/desktop-bun/src/ui-host.test.ts
+      - if: steps.platform.outputs.name == 'linux-x64'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download 1.9.1 --repo AppImage/appimagetool \
+            --pattern appimagetool-x86_64.AppImage --dir "$RUNNER_TEMP"
+          export APPIMAGETOOL="$RUNNER_TEMP/appimagetool-x86_64.AppImage"
+          chmod +x "$APPIMAGETOOL"
+          archives=(dist/paseo-bun-desktop-*-linux-x64-aot.tar.gz)
+          archive="${archives[0]}"
+          version=${archive#dist/paseo-bun-desktop-}
+          version=${version%-linux-x64-aot.tar.gz}
+          image="dist/Paseo-Bun-$version-x86_64.AppImage"
+          bash scripts/build-bun-appimage.sh "$archive" "$image"
+          XDG_DATA_HOME="$RUNNER_TEMP/appimage-smoke" APPIMAGE_EXTRACT_AND_RUN=1 "./$image" --version
+      - run: bun test packages/desktop-bun/src/ui-host.test.ts packages/desktop-bun/src/updater.test.ts
       - run: npx vitest run --config packages/server/vitest.config.ts packages/server/src/server/paseo-env.test.ts
       - run: bun test scripts/aot-module-path.test.ts scripts/trace-path.test.ts scripts/linux-desktop.test.ts
       - if: runner.os != 'Windows'
@@ -75,12 +90,17 @@ jobs:
           path: |
             dist/*-aot.tar.gz
             dist/*-aot.tar.gz.sha256
+            dist/*.AppImage
+            dist/*.AppImage.sha256
           if-no-files-found: error
       - if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag }}
-        run: gh release upload "$RELEASE_TAG" dist/*-aot.tar.gz dist/*-aot.tar.gz.sha256 --repo "$GITHUB_REPOSITORY" --clobber
+        run: |
+          shopt -s nullglob
+          gh release upload "$RELEASE_TAG" dist/*-aot.tar.gz dist/*-aot.tar.gz.sha256 \
+            dist/*.AppImage dist/*.AppImage.sha256 --repo "$GITHUB_REPOSITORY" --clobber
       - uses: actions/cache/save@v4
         if: always() && steps.cargo-cache.outputs.cache-hit != 'true'
         with:
