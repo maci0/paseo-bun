@@ -27,7 +27,7 @@ const desktopVersion = execFileSync(
   ["--version"],
   { encoding: "utf8" },
 );
-if (!desktopVersion.includes("0.16.2")) throw new Error("Desktop version smoke test failed");
+if (!desktopVersion.includes("0.16.3")) throw new Error("Desktop version smoke test failed");
 cpSync(path.join(root, "docs/bun-desktop.md"), path.join(output, "README-desktop.md"));
 if (process.platform === "linux") {
   const applications = path.join(output, "share/applications");
@@ -72,7 +72,7 @@ if (process.platform === "darwin") {
   cpSync(path.join(output, "paseo-bun-desktop"), path.join(contents, "MacOS/paseo-bun-desktop"));
   writeFileSync(
     path.join(contents, "Info.plist"),
-    `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>CFBundleIconFile</key><string>icon.icns</string><key>CFBundleExecutable</key><string>paseo-bun-desktop</string><key>CFBundleIdentifier</key><string>sh.paseo.bun</string><key>CFBundleName</key><string>Paseo Bun</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>0.16.2</string><key>CFBundleVersion</key><string>0.16.2</string><key>NSHighResolutionCapable</key><true/></dict></plist>`,
+    `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>CFBundleIconFile</key><string>icon.icns</string><key>CFBundleExecutable</key><string>paseo-bun-desktop</string><key>CFBundleIdentifier</key><string>sh.paseo.bun</string><key>CFBundleName</key><string>Paseo Bun</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>0.16.3</string><key>CFBundleVersion</key><string>0.16.3</string><key>NSHighResolutionCapable</key><true/></dict></plist>`,
   );
   run("codesign", ["--force", "--sign", "-", path.dirname(contents)]);
 }
