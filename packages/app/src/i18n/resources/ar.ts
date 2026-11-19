@@ -624,6 +624,7 @@ export const ar: TranslationResources = {
         subtitle: "افتح مساحة العمل هذه في Electron لاستخدام المتصفح المدمج.",
       },
       session: "جلسة المتصفح{{browserId}}",
+      localOnly: "أدخل عنوان localhost لمعاينته هنا. تُفتح المواقع الأخرى في متصفحك.",
       controls: {
         back: "خلف",
         forward: "إلى الأمام",

@@ -624,6 +624,7 @@ export const zhCN: TranslationResources = {
         subtitle: "在 Electron 中打开此 workspace 以使用内置浏览器。",
       },
       session: "浏览器会话 {{browserId}}",
+      localOnly: "输入 localhost 网址即可在此预览。其他网站会在浏览器中打开。",
       controls: {
         back: "后退",
         forward: "前进",

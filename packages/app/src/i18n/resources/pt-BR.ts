@@ -629,6 +629,8 @@ export const ptBR: TranslationResources = {
         subtitle: "Abra este workspace no Electron para usar o navegador integrado.",
       },
       session: "Sessão do navegador {{browserId}}",
+      localOnly:
+        "Digite uma URL localhost para visualizá-la aqui. Outros sites abrem no seu navegador.",
       controls: {
         back: "Voltar",
         forward: "Avançar",

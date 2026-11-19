@@ -631,6 +631,8 @@ export const ru: TranslationResources = {
           "Откройте это рабочее пространство в Electron, чтобы использовать встроенный браузер.",
       },
       session: "Сеанс браузера {{browserId}}",
+      localOnly:
+        "Введите URL localhost, чтобы открыть его здесь. Другие сайты открываются в браузере.",
       controls: {
         back: "Назад",
         forward: "Вперед",

@@ -630,6 +630,8 @@ export const ja: TranslationResources = {
         subtitle: "組み込みブラウザを使用するには、このワークスペースをElectronで開いてください。",
       },
       session: "ブラウザセッション{{browserId}}",
+      localOnly:
+        "localhost の URL を入力するとここでプレビューできます。その他のサイトはブラウザーで開きます。",
       controls: {
         back: "戻る",
         forward: "進む",

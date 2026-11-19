@@ -623,6 +623,7 @@ export const en = {
         subtitle: "Open this workspace in Electron to use the built-in browser.",
       },
       session: "Browser session {{browserId}}",
+      localOnly: "Enter a localhost URL to preview it here. Other sites open in your browser.",
       controls: {
         back: "Back",
         forward: "Forward",
