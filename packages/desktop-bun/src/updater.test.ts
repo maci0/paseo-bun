@@ -76,66 +76,72 @@ test("rejects an archive whose bytes do not match the published checksum", async
   ).rejects.toThrow("checksum");
 });
 
-test("installs only a verified AppImage at the original executable path", async () => {
-  const appImagePath = path.join(temp(), "My Paseo.AppImage");
-  writeFileSync(appImagePath, "old");
-  const name = "Paseo-Bun-0.16.2-x86_64.AppImage";
-  const url = `https://example.test/${name}`;
-  const next = "new AppImage";
-  const digest = createHash("sha256").update(next).digest("hex");
-  let checksum = "0".repeat(64);
-  const updater = createUpdater({
-    currentVersion: "0.16.1",
-    appImagePath,
-    fetchImpl: async (request: string) => {
-      if (request === url) return new Response(next);
-      if (request === `${url}.sha256`) return new Response(checksum);
-      return Response.json([
-        { tag_name: "bun-aot-v0.16.3", assets: asset("0.16.3") },
-        {
-          tag_name: "bun-aot-v0.16.2",
-          assets: [name, `${name}.sha256`].map((file) => ({
-            name: file,
-            browser_download_url: `https://example.test/${file}`,
-          })),
-        },
-      ]);
-    },
-  });
-  const { update } = await updater.check();
-  expect(update?.name).toBe(name);
-  if (!update) throw new Error("Expected AppImage update");
-  await expect(updater.stage(update)).rejects.toThrow("checksum");
-  expect(readFileSync(appImagePath, "utf8")).toBe("old");
-  checksum = digest;
-  await updater.stage(update);
-  expect(readFileSync(appImagePath, "utf8")).toBe("old");
-  expect(await updater.install()).toEqual({ installed: true, version: "0.16.2" });
-  expect(readFileSync(appImagePath, "utf8")).toBe(next);
-  expect(statSync(appImagePath).mode & 0o777).toBe(0o755);
-});
+test.skipIf(process.platform !== "linux")(
+  "installs only a verified AppImage at the original executable path",
+  async () => {
+    const appImagePath = path.join(temp(), "My Paseo.AppImage");
+    writeFileSync(appImagePath, "old");
+    const name = "Paseo-Bun-0.16.2-x86_64.AppImage";
+    const url = `https://example.test/${name}`;
+    const next = "new AppImage";
+    const digest = createHash("sha256").update(next).digest("hex");
+    let checksum = "0".repeat(64);
+    const updater = createUpdater({
+      currentVersion: "0.16.1",
+      appImagePath,
+      fetchImpl: async (request: string) => {
+        if (request === url) return new Response(next);
+        if (request === `${url}.sha256`) return new Response(checksum);
+        return Response.json([
+          { tag_name: "bun-aot-v0.16.3", assets: asset("0.16.3") },
+          {
+            tag_name: "bun-aot-v0.16.2",
+            assets: [name, `${name}.sha256`].map((file) => ({
+              name: file,
+              browser_download_url: `https://example.test/${file}`,
+            })),
+          },
+        ]);
+      },
+    });
+    const { update } = await updater.check();
+    expect(update?.name).toBe(name);
+    if (!update) throw new Error("Expected AppImage update");
+    await expect(updater.stage(update)).rejects.toThrow("checksum");
+    expect(readFileSync(appImagePath, "utf8")).toBe("old");
+    checksum = digest;
+    await updater.stage(update);
+    expect(readFileSync(appImagePath, "utf8")).toBe("old");
+    expect(await updater.install()).toEqual({ installed: true, version: "0.16.2" });
+    expect(readFileSync(appImagePath, "utf8")).toBe(next);
+    expect(statSync(appImagePath).mode & 0o777).toBe(0o755);
+  },
+);
 
-test("the apply script replaces the install directory after its parent exits", () => {
-  const root = temp();
-  const install = path.join(root, "paseo-bun");
-  mkdirSync(install);
-  writeFileSync(path.join(install, "marker"), "old");
-  const archiveDirectory = path.join(root, "source");
-  const bundle = path.join(archiveDirectory, "paseo-bun");
-  mkdirSync(path.join(bundle, "bin"), { recursive: true });
-  writeFileSync(path.join(bundle, "marker"), "new");
-  writeFileSync(path.join(bundle, "paseo-bun"), "#!/bin/sh\n");
-  writeFileSync(path.join(bundle, "paseo-bun-desktop"), "#!/bin/sh\n");
-  const archive = path.join(root, "update.tar.gz");
-  const packed = spawnSync("tar", ["-czf", archive, "-C", archiveDirectory, "paseo-bun"]);
-  expect(packed.status).toBe(0);
-  const script = createApplyScript({ installDirectory: install, archivePath: archive });
-  const gone = spawnSync("/bin/sh", ["-c", "exit 0"]);
-  const applied = spawnSync("/bin/sh", [script, String(gone.pid)]);
-  expect(applied.status, applied.stderr.toString()).toBe(0);
-  expect(readFileSync(path.join(install, "marker"), "utf8")).toBe("new");
-  expect(readFileSync(path.join(install, "paseo-bun"), "utf8")).toContain("bin/sh");
-});
+test.skipIf(process.platform === "win32")(
+  "the apply script replaces the install directory after its parent exits",
+  () => {
+    const root = temp();
+    const install = path.join(root, "paseo-bun");
+    mkdirSync(install);
+    writeFileSync(path.join(install, "marker"), "old");
+    const archiveDirectory = path.join(root, "source");
+    const bundle = path.join(archiveDirectory, "paseo-bun");
+    mkdirSync(path.join(bundle, "bin"), { recursive: true });
+    writeFileSync(path.join(bundle, "marker"), "new");
+    writeFileSync(path.join(bundle, "paseo-bun"), "#!/bin/sh\n");
+    writeFileSync(path.join(bundle, "paseo-bun-desktop"), "#!/bin/sh\n");
+    const archive = path.join(root, "update.tar.gz");
+    const packed = spawnSync("tar", ["-czf", archive, "-C", archiveDirectory, "paseo-bun"]);
+    expect(packed.status).toBe(0);
+    const script = createApplyScript({ installDirectory: install, archivePath: archive });
+    const gone = spawnSync("/bin/sh", ["-c", "exit 0"]);
+    const applied = spawnSync("/bin/sh", [script, String(gone.pid)]);
+    expect(applied.status, applied.stderr.toString()).toBe(0);
+    expect(readFileSync(path.join(install, "marker"), "utf8")).toBe("new");
+    expect(readFileSync(path.join(install, "paseo-bun"), "utf8")).toContain("bin/sh");
+  },
+);
 
 function asset(version: string) {
   const name = `paseo-bun-desktop-${version}-linux-x64-aot.tar.gz`;
