@@ -2473,16 +2473,17 @@ describe("batched tool-call history hydration", () => {
       timelineCursor: { epoch: "epoch", seq: index + 1 },
     }));
     const original = structuredClone(updates);
-    const expected = updates
-      .reduce<StreamItem[]>(
-        (state, update) =>
-          reduceStreamUpdate(state, update.event, update.timestamp, {
-            source: "canonical",
-            timelineCursor: update.timelineCursor,
-          }),
-        [],
-      )
-      .map((item) => (item.kind === "thought" ? { ...item, status: "ready" } : item));
+    const expected = updates.reduce<StreamItem[]>(
+      (state, update) =>
+        reduceStreamUpdate(state, update.event, update.timestamp, {
+          source: "canonical",
+          timelineCursor: update.timelineCursor,
+        }),
+      [],
+    );
+    for (const item of expected) {
+      if (item.kind === "thought") item.status = "ready";
+    }
     expect(hydrateStreamState(updates, { source: "canonical" })).toEqual(expected);
     expect(updates).toEqual(original);
   });

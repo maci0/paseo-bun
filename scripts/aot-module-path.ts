@@ -22,7 +22,7 @@ export function rebaseModuleUrl(source: string, relative: string): string {
     ts.forEachChild(node, visit);
   }
   visit(file);
-  for (const [start, end] of spans.reverse()) {
+  for (const [start, end] of spans.toReversed()) {
     source =
       source.slice(0, start) +
       `(globalThis.paseoModuleUrl ? globalThis.paseoModuleUrl(${JSON.stringify(relative)}) : import.meta.url)` +

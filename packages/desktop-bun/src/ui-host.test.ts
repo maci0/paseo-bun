@@ -89,10 +89,12 @@ describe("Elysia desktop UI host", () => {
       currentVersion: "0.16.1",
       version: "0.16.2",
     });
-    expect(await (await fetch(host.url + "/__paseo_ui/update", { method: "POST" })).json()).toEqual({
-      installed: true,
-      version: "0.16.2",
-    });
+    expect(await (await fetch(host.url + "/__paseo_ui/update", { method: "POST" })).json()).toEqual(
+      {
+        installed: true,
+        version: "0.16.2",
+      },
+    );
     expect(calls).toEqual(["check", "check", "stage", "install"]);
     const plain = fixture();
     expect((await fetch(plain.url + "/__paseo_ui/update", { method: "POST" })).status).toBe(404);
@@ -123,16 +125,16 @@ describe("Elysia desktop UI host", () => {
     socket.binaryType = "arraybuffer";
     cleanup.push(() => socket.close());
     await new Promise<void>((resolve, reject) => {
-      socket.onopen = () => resolve();
-      socket.onerror = reject;
+      socket.addEventListener("open", () => resolve(), { once: true });
+      socket.addEventListener("error", reject, { once: true });
     });
     const received = new Promise<unknown>((resolve) => {
-      socket.onmessage = (event) => resolve(event.data);
+      socket.addEventListener("message", (event) => resolve(event.data), { once: true });
     });
     socket.send('{"type":"hello"}');
     expect(await received).toBe('{"type":"hello"}');
     const binary = new Promise<ArrayBuffer>((resolve) => {
-      socket.onmessage = (event) => resolve(event.data);
+      socket.addEventListener("message", (event) => resolve(event.data), { once: true });
     });
     socket.send(new Uint8Array([0, 255, 3]));
     expect([...new Uint8Array(await binary)]).toEqual([0, 255, 3]);

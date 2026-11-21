@@ -1,8 +1,7 @@
 import { Elysia } from "elysia";
-import WebSocket from "ws";
+import { WebSocket } from "ws";
 import path from "node:path";
 import { MAX_WEBSOCKET_MESSAGE_BYTES } from "@getpaseo/protocol/websocket-message-limit";
-import { createUpdater } from "./updater.js";
 
 export function createUiHost({
   webRoot,

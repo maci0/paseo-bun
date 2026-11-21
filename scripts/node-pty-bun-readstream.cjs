@@ -26,10 +26,10 @@ SOFTWARE.
 const fs = require("node:fs");
 
 // Bun's tty stream closes the PTY on EAGAIN; retry reads without closing the master.
-exports.createReadStream = (fd) => {
+exports.createReadStream = (masterFd) => {
   let stream;
   stream = fs.createReadStream(null, {
-    fd,
+    fd: masterFd,
     autoClose: true,
     fs: {
       close: fs.close,
