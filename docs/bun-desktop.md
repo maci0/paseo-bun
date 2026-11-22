@@ -2,7 +2,7 @@
 
 This desktop distribution combines the native Bun AOT daemon and CLI, an
 Elysia HTTP host, and a Rust/Tauri v2 desktop window. It uses the production
-Paseo 0.17.0 React UI, including our indexed history-hydration performance
+Paseo 0.17.1 React UI, including our indexed history-hydration performance
 patch. The architecture follows [dsh-bun](https://github.com/evinelias/dsh-bun).
 
 ## macOS and Windows
@@ -47,8 +47,8 @@ Download matching `paseo-bun-desktop-*-linux-x64-aot.tar.gz` and `.sha256` asset
 from https://github.com/maci0/paseo-bun/releases, verify the checksum and extract:
 
 ```sh
-release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.17.0
-archive=paseo-bun-desktop-0.17.0-linux-x64-aot.tar.gz
+release_url=https://github.com/maci0/paseo-bun/releases/download/bun-aot-v0.17.1
+archive=paseo-bun-desktop-0.17.1-linux-x64-aot.tar.gz
 curl -fLO "$release_url/$archive"
 curl -fLO "$release_url/$archive.sha256"
 sha256sum -c "$archive.sha256"
@@ -120,10 +120,11 @@ For tarball installs, Check for updates in Settings reads `build-info.json` in t
 and downloads the newest full `bun-aot-v*` desktop archive for this OS from
 `maci0/paseo-bun`. It verifies the published SHA-256 and replaces that directory
 after the window closes. A prerelease is ignored, so a release has to be
-published without the pre-release flag before clients will install it. After
-Settings confirms the update, close the desktop window to let the installer
-swap the bundle, then relaunch from the same path. The button is absent when
-you run the app from a source checkout.
+published without the pre-release flag before clients will install it. On Linux,
+Install & restart relaunches the desktop and restarts its daemon while retaining
+terminals. On macOS, close the desktop window after Settings confirms the update,
+then relaunch from the same path. The button is absent when you run the app from
+a source checkout.
 Dynamic plugins and external scripts remain interpreted
 by Bun. The Rust shell and the Bun application graph are native AOT.
 

@@ -82,41 +82,60 @@ function shellQuote(value) {
 
 // The running desktop executable cannot replace itself. This script waits for
 // that process, extracts the verified archive, and swaps the install directory.
-export function createApplyScript({ installDirectory, archivePath }) {
-  const directory = mkdtempSync(path.join(tmpdir(), "paseo-bun-update-"));
+export function createApplyScript({ installDirectory, archivePath, restart = false }) {
+  const directory = mkdtempSync(path.join(path.dirname(installDirectory), ".paseo-bun-update-"));
   const scriptPath = path.join(directory, "apply.sh");
   const script = `#!/bin/sh
 set -eu
 parent=$1
-while kill -0 "$parent" 2>/dev/null; do
-  case "$(ps -o stat= -p "$parent")" in *Z*) break ;; esac
-  sleep 0.2
-done
 workdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+install_dir=${shellQuote(installDirectory)}
+wait_for_exit() {
+  while kill -0 "$1" 2>/dev/null; do
+    case "$(ps -o stat= -p "$1")" in *Z*) break ;; esac
+    sleep 0.2
+  done
+}
 tar -xzf ${shellQuote(archivePath)} -C "$workdir"
 test -d "$workdir/paseo-bun"
-chmod 755 "$workdir/paseo-bun/paseo-bun" "$workdir/paseo-bun/paseo-bun-desktop" 2>/dev/null || true
-install_dir=${shellQuote(installDirectory)}
-backup="$install_dir.previous"
-rm -rf "$backup"
+${
+  restart
+    ? `test -x "$workdir/paseo-bun/paseo-bun"
+test -x "$workdir/paseo-bun/paseo-bun-desktop"
+# Give the UI time to receive the install response before its window exits.
+sleep 1
+kill -TERM "$parent"`
+    : ""
+}
+wait_for_exit "$parent"
+${
+  restart
+    ? `wait_for_exit "$2"
+if ! "$install_dir/paseo-bun" daemon stop --keep-terminals --timeout 30; then
+  exec "$install_dir/paseo-bun-desktop"
+fi`
+    : ""
+}
+backup="$workdir/previous"
 mv "$install_dir" "$backup"
 if ! mv "$workdir/paseo-bun" "$install_dir"; then
   mv "$backup" "$install_dir"
-  exit 1
+  ${restart ? 'exec "$install_dir/paseo-bun-desktop"' : "exit 1"}
 fi
-rm -rf "$backup" "$workdir"
 rm -f ${shellQuote(archivePath)}
 rmdir "$(dirname ${shellQuote(archivePath)})" 2>/dev/null || true
+rm -rf "$workdir"
+${restart ? 'exec "$install_dir/paseo-bun-desktop"' : ""}
 `;
   writeFileSync(scriptPath, script, { mode: 0o755 });
   chmodSync(scriptPath, 0o755);
   return scriptPath;
 }
 
-export function spawnApply(scriptPath, parentPid) {
-  const child = spawn("/bin/sh", [scriptPath, String(parentPid)], {
+export function spawnApply(scriptPath, parentPid, hostPid) {
+  const child = spawn("/bin/sh", [scriptPath, String(parentPid), String(hostPid)], {
     detached: true,
-    stdio: "ignore",
+    stdio: ["ignore", "ignore", "inherit"],
   });
   child.unref();
 }
@@ -178,9 +197,12 @@ export function createUpdater({
       const scriptPath = createApplyScript({
         installDirectory,
         archivePath: pending.archivePath,
+        restart: platform === "linux",
       });
-      spawnApply(scriptPath, desktopPid);
-      return { installed: true, version: pending.update.version };
+      spawnApply(scriptPath, desktopPid, process.pid);
+      const { update } = pending;
+      pending = null;
+      return { installed: true, version: update.version };
     },
   };
 }
