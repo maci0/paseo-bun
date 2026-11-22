@@ -127,7 +127,10 @@
     "release:push": "node scripts/push-current-release-tag.mjs",
     "release:ship": "node scripts/push-current-release-tag.mjs --check && npm run release:publish && npm run release:push",
     "release:ship:beta": "node scripts/push-current-release-tag.mjs --check && npm run release:publish:beta && npm run release:push",
-    "release:reconcile": "node scripts/reconcile-release.mjs"
+    "release:reconcile": "node scripts/reconcile-release.mjs",
+    "build:bun": "bun scripts/build-bun.ts",
+    "test:bun": "bun scripts/test-bun.ts",
+    "build:desktop:bun": "bun scripts/build-desktop-bun.ts"
   },
   "devDependencies": {
     "@types/ws": "^8.5.14",

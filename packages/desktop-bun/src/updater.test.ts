@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { afterEach, expect, test } from "bun:test";
 import {
   compareVersions,
@@ -150,3 +150,42 @@ function asset(version: string) {
     browser_download_url: `https://example.test/${assetName}`,
   }));
 }
+
+test.skipIf(process.platform !== "linux")(
+  "restarts the Linux desktop after stopping its old daemon with terminal retention",
+  () => {
+    const root = temp();
+    const install = path.join(root, "install");
+    const bundle = path.join(root, "paseo-bun");
+    mkdirSync(install);
+    mkdirSync(bundle);
+    writeFileSync(
+      path.join(install, "paseo-bun"),
+      '#!/bin/sh\ntest "$*" = "daemon stop --keep-terminals --timeout 30" && echo stopped\n',
+      { mode: 0o755 },
+    );
+    writeFileSync(path.join(bundle, "paseo-bun"), "#!/bin/sh\n", { mode: 0o755 });
+    writeFileSync(path.join(bundle, "paseo-bun-desktop"), "#!/bin/sh\necho relaunched\n", {
+      mode: 0o755,
+    });
+    const archive = path.join(root, "update.tar.gz");
+    expect(spawnSync("tar", ["-czf", archive, "-C", root, "paseo-bun"]).status).toBe(0);
+    const script = createApplyScript({
+      installDirectory: install,
+      archivePath: archive,
+      restart: true,
+    });
+    const desktop = spawn("sleep", ["30"]);
+    const exitedHost = spawnSync("true");
+    try {
+      const result = spawnSync("/bin/sh", [script, String(desktop.pid), String(exitedHost.pid)], {
+        encoding: "utf8",
+        timeout: 5000,
+      });
+      expect(result.status, result.stderr).toBe(0);
+      expect(result.stdout).toBe("stopped\nrelaunched\n");
+    } finally {
+      desktop.kill();
+    }
+  },
+);
