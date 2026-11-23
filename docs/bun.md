@@ -1,6 +1,6 @@
 # Building Paseo with native Bun AOT
 
-Based on upstream Paseo 0.17.1 (`043f0995d4d7e91ab12f3eecef1afce055a81972`).
+Based on upstream Paseo 0.17.3 (`dd7c0499a8c311fae7b3244722a64d73cc178e4a`).
 The distribution follows [dsh-bun](https://github.com/maci0/dsh-bun)'s executable
 plus runtime-assets layout and reuses its MIT-licensed node-pty EAGAIN adapter.
 This fork now uses **native AOT**, rather than dsh-bun's runtime/JIT build.
@@ -37,8 +37,8 @@ dist/
     packages/                  daemon, workers, plugins, skills and native modules
     node_modules/              traced runtime dependencies and workspace links
     aot-entry.js               worker dispatcher used to compile the executable
-  paseo-bun-0.17.1-linux-x64-aot.tar.gz
-  paseo-bun-0.17.1-linux-x64-aot.tar.gz.sha256
+  paseo-bun-0.17.3-linux-x64-aot.tar.gz
+  paseo-bun-0.17.3-linux-x64-aot.tar.gz.sha256
 ```
 
 See [distribution instructions](bun-dist.md) for installation and upgrades.
