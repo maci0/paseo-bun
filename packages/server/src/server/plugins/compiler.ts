@@ -63,13 +63,13 @@ class PluginCompiler {
       await this.stopping;
       const worker = this.worker ?? this.startWorker();
       worker.child.ref();
-      worker.child.channel?.ref();
+      worker.child.channel?.ref?.();
       try {
         return await this.request<T>(worker, task, onLog);
       } finally {
         if (this.worker === worker) {
           worker.child.unref();
-          worker.child.channel?.unref();
+          worker.child.channel?.unref?.();
           this.idleTimer = setTimeout(() => this.stopWorker(worker), IDLE_TIMEOUT_MS);
           this.idleTimer.unref();
         } else {
