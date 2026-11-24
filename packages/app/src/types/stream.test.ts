@@ -2508,6 +2508,65 @@ describe("batched tool-call history hydration", () => {
     expect(updates).toEqual(original);
   });
 
+  it("matches text replay across user inserts, collisions and interrupted replies", () => {
+    const events: AgentStreamEventPayload[] = [
+      {
+        type: "timeline",
+        provider: "claude",
+        turnId: "a",
+        item: { type: "reasoning", text: "thinking" },
+      },
+      {
+        type: "timeline",
+        provider: "claude",
+        turnId: "a",
+        item: { type: "assistant_message", messageId: "reply", text: "one" },
+      },
+      {
+        type: "timeline",
+        provider: "claude",
+        turnId: "b",
+        item: {
+          type: "user_message",
+          messageId: "occupied",
+          clientMessageId: "client",
+          text: "two",
+        },
+      },
+      {
+        type: "timeline",
+        provider: "claude",
+        turnId: "a",
+        item: { type: "assistant_message", messageId: "reply", text: " continued" },
+      },
+      {
+        type: "timeline",
+        provider: "claude",
+        turnId: "b",
+        item: { type: "assistant_message", messageId: "occupied", text: "three" },
+      },
+      {
+        type: "timeline",
+        provider: "claude",
+        turnId: "b",
+        item: {
+          type: "user_message",
+          messageId: "occupied",
+          clientMessageId: "client",
+          text: "two",
+        },
+      },
+    ];
+    const updates = events.map((event, i) => ({ event, timestamp: new Date(1000 + i) }));
+    for (const source of ["live", "canonical"] as const) {
+      const expected = updates.reduce<StreamItem[]>(
+        (items, { event, timestamp }) => reduceStreamUpdate(items, event, timestamp, { source }),
+        [],
+      );
+      expect(hydrateStreamState(updates, { source })).toEqual(expected);
+    }
+  });
+
   it("keeps separate hydration results independent and preserves immutable live updates", () => {
     const updates = Array.from({ length: 2_000 }, (_, i) => ({
       event: tool("turn-a", `call-${i}`, "running"),
