@@ -66,7 +66,7 @@ function cli(args: string[], allowFailure = false) {
 }
 let uiHost: ReturnType<typeof spawn> | null = null;
 try {
-  assert.equal(cli(["--version"]), info.version);
+  assert.equal(cli(["--version"]), info.upstreamVersion);
   cli(["daemon", "start", "--home", home, "--timeout", "30"]);
   assert.deepEqual(JSON.parse(cli(["--host", address, "ls", "--json"])), []);
   cli(["--host", address, "provider", "ls", "--json"]);

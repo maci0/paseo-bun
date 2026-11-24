@@ -23,6 +23,11 @@ function temp() {
   return directory;
 }
 
+test("orders a Bun packaging revision between its upstream base and the next patch", () => {
+  expect(compareVersions("0.17.4-bun.1", "0.17.4")).toBe(1);
+  expect(compareVersions("0.17.4-bun.1", "0.17.5")).toBe(-1);
+});
+
 test("orders dotted versions and ignores a prefix", () => {
   expect(compareVersions("0.16.0", "0.16.1")).toBe(-1);
   expect(compareVersions("v0.16.1", "0.16.1")).toBe(0);

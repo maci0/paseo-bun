@@ -80,7 +80,7 @@ function cli(args: string[], allowFailure = false): string {
 }
 let uiHost: ReturnType<typeof spawn> | null = null;
 try {
-  assert.equal(cli(["--version"]), info.version);
+  assert.equal(cli(["--version"]), info.upstreamVersion);
   assert.match(cli(["--help"]), /daemon/);
   const jitProbe = spawnSync(binary, ["-e", "process.exit(0)"], {
     env: { ...env, BUN_BE_BUN: "1" },

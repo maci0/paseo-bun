@@ -1,6 +1,6 @@
 {
   "name": "@getpaseo/desktop-bun",
-  "version": "0.17.4",
+  "version": "0.17.4-bun.1",
   "private": true,
   "description": "Paseo Bun AOT + Elysia + Tauri v2 desktop",
   "type": "module",
