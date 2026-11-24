@@ -1,7 +1,7 @@
 # Maintainer: Paseo Bun contributors
 pkgname=paseo-bun-bin
 pkgver=0.17.4
-pkgrel=3
+pkgrel=4
 pkgdesc='Paseo native Bun AOT desktop and daemon with Elysia, Tauri v2 and UI performance patches (release binaries)'
 arch=('x86_64')
 url='https://github.com/maci0/paseo-bun'
@@ -11,10 +11,10 @@ optdepends=('openssh: SSH connections and Git remotes')
 provides=("paseo-bun=$pkgver")
 conflicts=('paseo-bun')
 options=('!strip' '!debug')
-_distver=0.17.4-bun.2
+_distver=0.17.4-bun.3
 _release=bun-aot-v${_distver}
 source=("paseo-bun-desktop-${_distver}-linux-x64-aot.tar.gz::${url}/releases/download/${_release}/paseo-bun-desktop-${_distver}-linux-x64-aot.tar.gz")
-sha256sums=('9b7ee6ae99862ab9e0bffe760d641d04ddcc6521558f1f577f74d0504d46a9ea')
+sha256sums=('5f997767c5e2be7e401476150e6426a86e6cd69fa2c4c42f36a904a22424060f')
 
 check() {
   [[ $("$srcdir/paseo-bun/paseo-bun" --version) == "$pkgver" ]]
