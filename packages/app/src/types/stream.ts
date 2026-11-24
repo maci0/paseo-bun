@@ -252,7 +252,10 @@ function produceUserMessage(
       return { items, index: -1, message: incoming, matched: false };
     }
     return {
-      items: [...items.slice(0, insertAt), incoming, ...items.slice(insertAt)],
+      items:
+        insertAt === items.length
+          ? [...items, incoming]
+          : [...items.slice(0, insertAt), incoming, ...items.slice(insertAt)],
       index: insertAt,
       message: incoming,
       matched: false,
@@ -1068,16 +1071,15 @@ function appendThought(
 }
 
 function finalizeActiveThoughts(state: StreamItem[]): StreamItem[] {
-  let mutated = false;
-  const nextState = state.map((entry) => {
+  let next = state;
+  for (let i = 0; i < state.length; i++) {
+    const entry = state[i]!;
     if (entry.kind === "thought" && entry.status !== "ready") {
-      mutated = true;
-      return markThoughtReady(entry);
+      if (next === state) next = [...state];
+      next[i] = markThoughtReady(entry);
     }
-    return entry;
-  });
-
-  return mutated ? nextState : state;
+  }
+  return next;
 }
 
 export function streamTimelineItemIdentity(item: StreamItem): string | null {
@@ -1241,7 +1243,7 @@ export function mergeAgentToolCallItem(
 
 interface HistoryIndex {
   toolPositions: Map<string, number>;
-  ids: Set<string>;
+  ids?: Set<string>;
 }
 
 interface AppendAgentToolCallInput {
@@ -1302,7 +1304,7 @@ function appendAgentToolCall(input: AppendAgentToolCallInput): StreamItem[] {
 
   if (hydrationIndex) {
     hydrationIndex.toolPositions.set(identity, state.length);
-    hydrationIndex.ids.add(item.id);
+    hydrationIndex.ids?.add(item.id);
     state.push(item);
     return state;
   }
@@ -1741,8 +1743,38 @@ export function hydrateStreamState(
   let hydrated: StreamItem[] = [];
   let index: HistoryIndex | null = null;
   for (const { event, timestamp, timelineCursor } of events) {
-    if (index && event.type === "timeline" && event.item.type === "assistant_message") {
-      // Indexed tool runs have no pending thoughts. Appending text preserves every tool position.
+    if (
+      event.type !== "timeline" ||
+      (event.item.type !== "tool_call" && event.item.type !== "assistant_message")
+    ) {
+      const next = reduceStreamUpdate(hydrated, event, timestamp, { ...options, timelineCursor });
+      // A newly appended user row preserves every indexed position. A reconciled row may change ID.
+      if (
+        index &&
+        event.type === "timeline" &&
+        event.item.type === "user_message" &&
+        next.length === hydrated.length + 1
+      ) {
+        index.ids?.add(next[next.length - 1]!.id);
+      } else {
+        index = null;
+      }
+      hydrated = next;
+      continue;
+    }
+
+    // Hydration owns this array. Consecutive tool and text events can append in place.
+    if (!index) {
+      hydrated = finalizeActiveThoughts(hydrated);
+      index = { toolPositions: new Map() };
+      for (const [position, item] of hydrated.entries()) {
+        const identity = streamTimelineItemIdentity(item);
+        if (identity !== null && !index.toolPositions.has(identity))
+          index.toolPositions.set(identity, position);
+      }
+    }
+    if (event.item.type === "assistant_message") {
+      index.ids ??= new Set(hydrated.map((item) => item.id));
       hydrated = appendAssistantMessage(
         hydrated,
         event.item.text,
@@ -1754,23 +1786,6 @@ export function hydrateStreamState(
         { ids: index.ids, turnId: event.turnId },
       );
       continue;
-    }
-    if (event.type !== "timeline" || event.item.type !== "tool_call") {
-      hydrated = reduceStreamUpdate(hydrated, event, timestamp, { ...options, timelineCursor });
-      index = null;
-      continue;
-    }
-
-    // Hydration owns this array: consecutive tool updates can share an index and append in place.
-    if (!index) {
-      hydrated = finalizeActiveThoughts(hydrated);
-      index = { toolPositions: new Map(), ids: new Set() };
-      for (const [position, item] of hydrated.entries()) {
-        index.ids.add(item.id);
-        const identity = streamTimelineItemIdentity(item);
-        if (identity !== null && !index.toolPositions.has(identity))
-          index.toolPositions.set(identity, position);
-      }
     }
     const next = applyTimelineTurnId(
       hydrated,
