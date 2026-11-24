@@ -1,7 +1,7 @@
 # Maintainer: Paseo Bun contributors
 pkgname=paseo-bun
 pkgver=0.17.4
-pkgrel=1
+pkgrel=2
 pkgdesc='Paseo desktop and daemon with native Bun AOT, Elysia, Tauri v2 and UI performance patches'
 arch=('x86_64')
 url='https://github.com/maci0/paseo-bun'
@@ -11,7 +11,7 @@ makedepends=('bun' 'nodejs>=24' 'npm' 'rust' 'pkgconf')
 optdepends=('openssh: SSH connections and Git remotes')
 conflicts=('paseo-bun-bin')
 options=('!strip' '!debug')
-_commit=3f00d7ed1a9ae38ba3e9a477365ab470f2ca9cff
+_commit=c2b0d6d5d72d2602ee5210f42ddd07d0a5e49927
 source=("paseo-bun-source::git+${url}.git#commit=${_commit}")
 sha256sums=('SKIP')
 
