@@ -162,10 +162,14 @@ execFileSync(
   { cwd: output, stdio: "inherit" },
 );
 console.log(`Built native AOT ${output}/paseo-bun; distribute the entire directory.`);
-const version = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8")).version;
+const upstreamVersion = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8")).version;
+const version = JSON.parse(
+  readFileSync(path.join(root, "packages/desktop-bun/package.json"), "utf8"),
+).version;
 const archive = `paseo-bun-${version}-${process.platform}-${process.arch}-aot.tar.gz`;
 const info = {
   version,
+  upstreamVersion,
   mode: "native-aot",
   trim: true,
   webUi: true,
