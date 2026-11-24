@@ -2433,6 +2433,26 @@ describe("batched tool-call history hydration", () => {
         item: { type: "reasoning", text: "Planning" },
       },
       tool("turn-a", "same-call", "running"),
+      {
+        type: "timeline",
+        provider: "claude",
+        turnId: "turn-a",
+        item: {
+          type: "assistant_message",
+          text: "Starting",
+          messageId: "agent_tool_turn:turn-a/same-call",
+        },
+      },
+      {
+        type: "timeline",
+        provider: "claude",
+        turnId: "turn-b",
+        item: {
+          type: "assistant_message",
+          text: " again",
+          messageId: "agent_tool_turn:turn-a/same-call",
+        },
+      },
       tool("turn-a", "same-call", "completed"),
       tool("turn-b", "same-call", "running"),
       {
