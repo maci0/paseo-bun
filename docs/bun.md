@@ -37,8 +37,8 @@ dist/
     packages/                  daemon, workers, plugins, skills and native modules
     node_modules/              traced runtime dependencies and workspace links
     aot-entry.js               worker dispatcher used to compile the executable
-  paseo-bun-0.17.4-bun.1-linux-x64-aot.tar.gz
-  paseo-bun-0.17.4-bun.1-linux-x64-aot.tar.gz.sha256
+  paseo-bun-0.17.4-bun.2-linux-x64-aot.tar.gz
+  paseo-bun-0.17.4-bun.2-linux-x64-aot.tar.gz.sha256
 ```
 
 See [distribution instructions](bun-dist.md) for installation and upgrades.
