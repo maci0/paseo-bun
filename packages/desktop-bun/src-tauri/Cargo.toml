@@ -1,6 +1,6 @@
 [package]
 name = "paseo-bun-desktop"
-version = "0.17.4-bun.2"
+version = "0.17.4-bun.3"
 description = "Paseo desktop: Bun AOT, Elysia and Tauri v2"
 authors = ["Paseo Bun contributors"]
 edition = "2021"
