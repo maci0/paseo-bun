@@ -2,7 +2,7 @@
 
 This desktop distribution combines the native Bun AOT daemon and CLI, an
 Elysia HTTP host, and a Rust/Tauri v2 desktop window. It uses the production
-Paseo 0.17.4 React UI, including our indexed history-hydration performance
+Paseo 0.18.0 React UI, including our indexed history-hydration performance
 patch. The architecture follows [dsh-bun](https://github.com/evinelias/dsh-bun).
 
 ## macOS and Windows

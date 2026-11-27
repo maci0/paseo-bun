@@ -120,11 +120,16 @@ async function readBunUpdate(): Promise<DesktopAppUpdateCheckResult> {
   const response = await fetch("/__paseo_ui/update");
   const body: unknown = await response.json();
   if (!response.ok || !isRecord(body)) {
-    throw new Error(isRecord(body) ? (toStringOrNull(body.error) ?? "Update check failed") : "Update check failed");
+    throw new Error(
+      isRecord(body)
+        ? (toStringOrNull(body.error) ?? "Update check failed")
+        : "Update check failed",
+    );
   }
   return {
     hasUpdate: body.available === true,
     readyToInstall: body.available === true,
+    downloading: false,
     currentVersion: toStringOrNull(body.currentVersion),
     latestVersion: toStringOrNull(body.version),
     body: null,

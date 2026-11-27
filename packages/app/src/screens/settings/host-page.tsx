@@ -34,6 +34,7 @@ import {
   ProfileDraft,
   TerminalProfileEditModal,
 } from "@/screens/settings/terminal-profile-edit-modal";
+import { shouldUseDesktopDaemon } from "@/desktop/daemon/desktop-daemon";
 import { LocalDaemonSection } from "@/desktop/components/desktop-updates-section";
 import { WaysToConnect } from "@/devices";
 import { useDaemonConfig } from "@/hooks/use-daemon-config";
@@ -404,7 +405,7 @@ export function HostDaemonPage({ serverId }: { serverId: string }) {
       <HostStatusBadges serverId={serverId} />
       <HostConnectionError serverId={serverId} />
 
-      {isLocalDaemon ? <LocalDaemonSection /> : null}
+      {isLocalDaemon && shouldUseDesktopDaemon() ? <LocalDaemonSection /> : null}
 
       {!isLocalDaemon ? <UpdateDaemonCard key={host.serverId} host={host} /> : null}
 

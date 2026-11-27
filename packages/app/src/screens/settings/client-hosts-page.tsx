@@ -17,7 +17,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useIsCompactFormFactor } from "@/constants/layout";
-import { startDesktopDaemon, stopDesktopDaemon } from "@/desktop/daemon/desktop-daemon";
+import {
+  shouldUseDesktopDaemon,
+  startDesktopDaemon,
+  stopDesktopDaemon,
+} from "@/desktop/daemon/desktop-daemon";
 import type { EnableBuiltInDaemonOption } from "@/desktop/hooks/use-enable-built-in-daemon-option";
 import { useDaemonStatus } from "@/desktop/hooks/use-daemon-status";
 import { useDesktopSettings } from "@/desktop/settings/desktop-settings";
@@ -461,7 +465,7 @@ function RemoveClientHostSection({
     const remove = async () => {
       let didDisableDaemonManagement = false;
       let didStopDaemon = false;
-      if (isLocalDaemon) {
+      if (isLocalDaemon && shouldUseDesktopDaemon()) {
         try {
           await updateSettings({ daemon: { manageBuiltInDaemon: false } });
           didDisableDaemonManagement = true;
